@@ -1,46 +1,113 @@
 package com.es.phoneshop.model.product;
 
+import com.es.phoneshop.exception.ProductNotFoundException;
+
 import java.math.BigDecimal;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Currency;
+import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.stream.Stream;
 
 public class ArrayListProductDao implements ProductDao {
-    private List<Product> products;
+    private static volatile ProductDao instance;
+    private final List<Product> products;
     private long maxId = 0;
+    private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
+
     public ArrayListProductDao() {
         this.products = new ArrayList<>();
         saveSampleProducts();
     }
 
-    @Override
-    public Product getProduct(Long id) throws ProductNotFoundException {
-        return products.stream()
-                .filter(product -> id.equals(product.getId()))
-                .findAny()
-                .orElseThrow(() -> new ProductNotFoundException());
+    public static ProductDao getInstance() {
+        if (instance == null) {
+            synchronized (ArrayListProductDao.class) {
+                if (instance == null) {
+                    instance = new ArrayListProductDao();
+                }
+            }
+        }
+        return instance;
     }
 
     @Override
-    public List<Product> findProducts() {
-        return products.stream()
-                .filter(product -> product.getPrice() != null)
-                .filter(product -> product.getStock() > 0)
-                .collect(Collectors.toList());
+    public Product getProduct(Long id) throws ProductNotFoundException {
+        Lock readLock = rwLock.readLock();
+        readLock.lock();
+        try {
+            return products.stream()
+                    .filter(product -> id.equals(product.getId()))
+                    .findFirst()
+                    .orElseThrow(() -> new ProductNotFoundException(id));
+        } finally {
+            readLock.unlock();
+        }
+    }
+
+    @Override
+    public List<Product> findProducts(String query, SortField sortField, SortOrder sortOrder) {
+        Lock readLock = rwLock.readLock();
+        readLock.lock();
+        try {
+            String lowerCaseQuery = query.toLowerCase();
+
+            Stream<Product> productStream = products.stream()
+                    .filter(product -> product.getDescription().toLowerCase().contains(lowerCaseQuery));
+
+            if (sortField != null) {
+                Comparator<Product> comparator = switch (sortField) {
+                    case description -> Comparator.comparing(Product::getDescription, Comparator.nullsLast(String::compareTo));
+                    case price -> Comparator.comparing(Product::getPrice, Comparator.nullsLast(Comparator.naturalOrder()));
+                };
+                if (sortOrder == SortOrder.desc) {
+                    comparator = comparator.reversed();
+                }
+                productStream = productStream.sorted(comparator);
+            }
+            return productStream.toList();
+        } finally {
+            readLock.unlock();
+        }
     }
 
     @Override
     public void save(Product product) {
-        product.setId(maxId++);
-        products.add(product);
+        Lock writeLock = rwLock.writeLock();
+        writeLock.lock();
+        try {
+            if (product.getId() != null) {
+                try {
+                    Product existingProduct = getProduct(product.getId());
+                    int index = products.indexOf(existingProduct);
+                    products.set(index, product);
+                } catch (ProductNotFoundException e) {
+                    throw new RuntimeException("Не удалось обновить продукт, так как он не найден: " + product.getId(), e);
+                }
+            } else {
+                product.setId(maxId++);
+                products.add(product);
+            }
+        } finally {
+            writeLock.unlock();
+        }
     }
 
     @Override
     public void delete(Long id) {
-        throw new RuntimeException("Not implemented");
+        Lock writeLock = rwLock.writeLock();
+        writeLock.lock();
+        try {
+            products.removeIf(product -> id.equals(product.getId()));
+        } finally {
+            writeLock.unlock();
+        }
     }
 
     private void saveSampleProducts(){
-        List<Product> result = new ArrayList<>();
         Currency usd = Currency.getInstance("USD");
         save(new Product( "sgs", "Samsung Galaxy S", new BigDecimal(100), usd, 100, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Samsung/Samsung%20Galaxy%20S.jpg"));
         save(new Product("sgs2", "Samsung Galaxy S II", new BigDecimal(200), usd, 0, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Samsung/Samsung%20Galaxy%20S%20II.jpg"));
