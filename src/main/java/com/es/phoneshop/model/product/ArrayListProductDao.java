@@ -15,7 +15,7 @@ import java.util.stream.Stream;
 public class ArrayListProductDao implements ProductDao {
     private static volatile ProductDao instance;
     private final List<Product> products;
-    private long maxId = 0;
+    private long maxId = 1;
     private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
 
     public ArrayListProductDao() {
@@ -60,10 +60,10 @@ public class ArrayListProductDao implements ProductDao {
 
             if (sortField != null) {
                 Comparator<Product> comparator = switch (sortField) {
-                    case description -> Comparator.comparing(Product::getDescription, Comparator.nullsLast(String::compareTo));
-                    case price -> Comparator.comparing(Product::getPrice, Comparator.nullsLast(Comparator.naturalOrder()));
+                    case DESCRIPTION -> Comparator.comparing(Product::getDescription, Comparator.nullsLast(String::compareTo));
+                    case PRICE -> Comparator.comparing(Product::getPrice, Comparator.nullsLast(Comparator.naturalOrder()));
                 };
-                if (sortOrder == SortOrder.desc) {
+                if (sortOrder == SortOrder.DESC) {
                     comparator = comparator.reversed();
                 }
                 productStream = productStream.sorted(comparator);
@@ -83,12 +83,18 @@ public class ArrayListProductDao implements ProductDao {
                 try {
                     Product existingProduct = getProduct(product.getId());
                     int index = products.indexOf(existingProduct);
+
+                    if (existingProduct.getPrice() != null && !existingProduct.getPrice().equals(product.getPrice())) {
+                        existingProduct.addPriceHistory(existingProduct.getPrice(), existingProduct.getCurrency());
+                    }
+
                     products.set(index, product);
                 } catch (ProductNotFoundException e) {
-                    throw new RuntimeException("Не удалось обновить продукт, так как он не найден: " + product.getId(), e);
+                    throw new RuntimeException("Не удалось обновить продукт: " + product.getId(), e);
                 }
             } else {
                 product.setId(maxId++);
+                product.addPriceHistory(product.getPrice(), product.getCurrency());
                 products.add(product);
             }
         } finally {
