@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class ProductListPageServlet extends HttpServlet {
     private ProductDao productDAO;
@@ -52,7 +53,10 @@ public class ProductListPageServlet extends HttpServlet {
 
         List<Product> products = productDAO.findProducts(query, sortField, sortOrder);
 
+        Map<Long, List<PriceHistory>> priceHistoryMap = productDAO.getPriceHistory();
+
         request.setAttribute("products", new ArrayList<>(products));
+        request.setAttribute("priceHistoryMap", priceHistoryMap);
         request.getRequestDispatcher("/WEB-INF/pages/productList.jsp").forward(request, response);
     }
 }
