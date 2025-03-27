@@ -44,7 +44,7 @@
           <td class="price">
             <fmt:formatNumber value="${product.price != null ? product.price : 0}"
                               type="currency"
-                              currencySymbol="${product.currency.symbol}"
+                              currencySymbol="${product.currency != null ? product.currency.symbol : '$'}"
                               pattern="#,##0.00"/>
           </td>
           <td>
@@ -56,8 +56,9 @@
                     <div>
                       <fmt:formatNumber value="${price.price}"
                                         type="currency"
-                                        currencySymbol="${product.currency.symbol}"
+                                        currencySymbol="${price.currency.symbol}"
                                         pattern="#,##0.00"/>
+                                        (Updated on <fmt:formatDate value="${price.date}" pattern="dd-MM-yyyy HH:mm"/>)
                     </div>
                   </c:forEach>
                 </c:when>

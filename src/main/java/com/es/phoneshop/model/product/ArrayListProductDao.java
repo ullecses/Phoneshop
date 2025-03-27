@@ -87,7 +87,7 @@ public class ArrayListProductDao implements ProductDao {
                     int index = products.indexOf(existingProduct);
 
                     if (existingProduct.getPrice() != null && !existingProduct.getPrice().equals(product.getPrice())) {
-                        existingProduct.addPriceHistory(existingProduct.getPrice(), existingProduct.getCurrency());
+                        existingProduct.setPrice(existingProduct.getPrice(), existingProduct.getCurrency());
                     }
 
                     products.set(index, product);
@@ -96,7 +96,7 @@ public class ArrayListProductDao implements ProductDao {
                 }
             } else {
                 product.setId(maxId++);
-                product.addPriceHistory(product.getPrice(), product.getCurrency());
+                product.setPrice(product.getPrice(), product.getCurrency());
                 products.add(product);
             }
         } finally {
@@ -139,7 +139,16 @@ public class ArrayListProductDao implements ProductDao {
         try {
             Map<Long, List<PriceHistory>> historyMap = new HashMap<>();
             for (Product product : products) {
-                historyMap.put(product.getId(), product.getPriceHistory());
+                List<PriceHistory> history = product.getPriceHistory();
+                System.out.println("Product ID: " + product.getId());
+                if (history != null && !history.isEmpty()) {
+                    for (PriceHistory price : history) {
+                        System.out.println("  Price: " + price.getPrice() + ", Date: " + price.getDate() + ", Currency: " + price.getCurrency());
+                    }
+                } else {
+                    System.out.println("  No price history found.");
+                }
+                historyMap.put(product.getId(), history);
             }
             return historyMap;
         } finally {
