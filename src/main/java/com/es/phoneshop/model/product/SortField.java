@@ -17,7 +17,7 @@ public enum SortField {
     }
 
     public Comparator<Product> getComparator(List<String> queryWords) {
-        if (this == DESCRIPTION && queryWords != null && !queryWords.isEmpty()) {
+        if (this == DESCRIPTION && queryWords != null && !queryWords.getFirst().isEmpty()) {
             return Comparator.comparingInt((Product p) -> countQueryOccurrences(p, queryWords)).reversed();
         }
         return comparator;
