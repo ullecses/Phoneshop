@@ -12,4 +12,5 @@ public interface ProductDao {
     void save(Product product);
     void delete(Long id);
     Map<Long, List<PriceHistory>> getPriceHistory();
+    void clear();
 }

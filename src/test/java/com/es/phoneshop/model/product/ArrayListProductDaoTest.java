@@ -13,19 +13,21 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-public class ArrayListProductDaoTest
-{
+public class ArrayListProductDaoTest {
     private ProductDao productDao;
     private Product product;
+    private Currency usd;
 
     @Before
     public void setup() {
+        productDao = ArrayListProductDao.getInstance();
+        usd = Currency.getInstance("USD");
+
+        productDao.clear();
     }
 
     @Test
     public void testSaveProduct() {
-        productDao = ArrayListProductDao.getInstance();
-        Currency usd = Currency.getInstance("USD");
         product = new Product("sgs", "Samsung Galaxy S", new BigDecimal(100), usd, 100,
                 "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Samsung/Samsung%20Galaxy%20S.jpg");
 
@@ -45,8 +47,6 @@ public class ArrayListProductDaoTest
 
     @Test
     public void testFindProductsByQuery() {
-        productDao = ArrayListProductDao.getInstance();
-        Currency usd = Currency.getInstance("USD");
 
         productDao.save(new Product("sgs", "Phone A", new BigDecimal(500), usd, 100,
                 "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Samsung/Samsung%20Galaxy%20S.jpg"));
@@ -63,9 +63,6 @@ public class ArrayListProductDaoTest
 
     @Test
     public void testFindProductsSortByDescription() {
-        productDao = ArrayListProductDao.getInstance();
-        Currency usd = Currency.getInstance("USD");
-
         productDao.save(new Product("sgs", "Phone A", new BigDecimal(500), usd, 100,
                 "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Samsung/Samsung%20Galaxy%20S.jpg"));
         productDao.save(new Product("sgs", "Phone B", new BigDecimal(700), usd, 100,
@@ -79,9 +76,6 @@ public class ArrayListProductDaoTest
 
     @Test
     public void testFindProductsSortByPriceDesc() {
-        productDao = ArrayListProductDao.getInstance();
-        Currency usd = Currency.getInstance("USD");
-
         productDao.save(new Product("sgs", "Phone A", new BigDecimal(500), usd, 100,
                 "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Samsung/Samsung%20Galaxy%20S.jpg"));
         productDao.save(new Product("sgs", "Phone B", new BigDecimal(700), usd, 100,

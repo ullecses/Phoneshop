@@ -134,4 +134,9 @@ public class ArrayListProductDao implements ProductDao {
             readLock.unlock();
         }
     }
+
+    @Override
+    public void clear() {
+        products.clear();
+    }
 }
