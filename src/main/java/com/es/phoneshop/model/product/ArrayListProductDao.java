@@ -86,18 +86,14 @@ public class ArrayListProductDao implements ProductDao {
         writeLock.lock();
         try {
             if (product.getId() != null) {
-                try {
-                    Product existingProduct = getProduct(product.getId());
-                    int index = products.indexOf(existingProduct);
+                Product existingProduct = getProduct(product.getId());
+                int index = products.indexOf(existingProduct);
 
-                    if (existingProduct.getPrice() != null && !existingProduct.getPrice().equals(product.getPrice())) {
-                        existingProduct.setPrice(existingProduct.getPrice(), existingProduct.getCurrency());
-                    }
-
-                    products.set(index, product);
-                } catch (ProductNotFoundException e) {
-                    throw new RuntimeException("Не удалось обновить продукт: " + product.getId(), e);
+                if (existingProduct.getPrice() != null && !existingProduct.getPrice().equals(product.getPrice())) {
+                    existingProduct.setPrice(existingProduct.getPrice(), existingProduct.getCurrency());
                 }
+
+                products.set(index, product);
             } else {
                 product.setId(maxId++);
                 product.setPrice(product.getPrice(), product.getCurrency());
