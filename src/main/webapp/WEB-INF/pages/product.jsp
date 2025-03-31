@@ -75,4 +75,33 @@
     </c:forEach>
   </table>
 
+  <h2>Последние просмотренные товары</h2>
+  <c:if test="${not empty recentProducts}">
+      <table border="1">
+          <tr>
+              <th>Image</th>
+              <th>Code</th>
+              <th>Price</th>
+          </tr>
+          <c:forEach var="recent" items="${recentProducts}">
+                      <tr>
+                          <td>
+                              <a href="${pageContext.request.contextPath}/products/${recent.id}">
+                                  <img src="${recent.imageUrl}" width="50">
+                              </a>
+                          </td>
+                          <td>
+                              <a href="${pageContext.request.contextPath}/products/${recent.id}">
+                                  ${recent.code}
+                              </a>
+                          </td>
+                          <td>
+                              <fmt:formatNumber value="${recent.price}" type="currency" currencySymbol="${recent.currency.symbol}"/>
+                          </td>
+                      </tr>
+                  </c:forEach>
+      </table>
+  </c:if>
+
+
 </tags:master>
