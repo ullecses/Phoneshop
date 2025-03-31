@@ -19,6 +19,10 @@ public class DefaultCartService implements CartService {
         productDao = ArrayListProductDao.getInstance();
     }
 
+    public DefaultCartService(ProductDao productDao) {
+        this.productDao = productDao;
+    }
+
     private static class SingletonHelper {
         private static final DefaultCartService INSTANCE = new DefaultCartService();
     }
