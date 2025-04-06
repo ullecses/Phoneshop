@@ -10,6 +10,9 @@ import com.es.phoneshop.model.product.ProductDao;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 public class DefaultCartService implements CartService {
     private static final String CART_SESSION_ATTRIBUTE = DefaultCartService.class.getName() + ".cart";
 
@@ -66,5 +69,55 @@ public class DefaultCartService implements CartService {
 
             cart.getItems().add(new CartItem(product, quantity));
         }
+        recalculateCart(cart);
+    }
+
+    @Override
+    public void update(Cart cart, long productId, int quantity) throws OutOfStockException {
+        Product product = productDao.getProduct(productId);
+        Optional<CartItem> cartItemOptional = findCartItemForUpdate(cart, productId, quantity);
+
+        if (product.getStock() < quantity) {
+            throw new OutOfStockException(product, quantity, product.getStock());
+        }
+
+        if (cartItemOptional.isPresent()) {
+            cartItemOptional.get().setQuantity(quantity);
+        } else {
+            cart.getItems().add(new CartItem(product, quantity));
+        }
+        recalculateCart(cart);
+    }
+
+    @Override
+    public void delete(Cart cart, Long productId) {
+        cart.getItems().removeIf(item ->
+                productId.equals(item.getProduct().getId()));
+        recalculateCart(cart);
+    }
+
+    private Optional<CartItem> findCartItemForUpdate(Cart cart, long productId, int quantity) throws OutOfStockException {
+        if (quantity <= 0) {
+            throw new OutOfStockException(null, quantity, 0);
+        }
+
+        Product product = productDao.getProduct(productId);
+        Optional<CartItem> cartItemOptional = cart.getItems().stream()
+                .filter(c -> c.getProduct().getId().equals(product.getId()))
+                .findAny();
+
+        int productsAmount = cartItemOptional.map(CartItem::getQuantity).orElse(0);
+
+        if (product.getStock() < productsAmount + quantity) {
+            throw new OutOfStockException(product, productsAmount + quantity, product.getStock());
+        }
+
+        return cartItemOptional;
+    }
+
+    private void recalculateCart(Cart cart) {
+        cart.setTotalQuantity(cart.getItems().stream()
+                .map(CartItem::getQuantity)
+                .collect(Collectors.summingInt(q -> q.intValue())));
     }
 }
