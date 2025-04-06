@@ -8,9 +8,9 @@ import java.util.Date;
 public class PriceHistory implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    private Date date;
-    private BigDecimal price;
-    private Currency currency;
+    private final Date date;
+    private final BigDecimal price;
+    private final Currency currency;
 
     public PriceHistory(Date date, BigDecimal price, Currency currency) {
         this.date = date;
