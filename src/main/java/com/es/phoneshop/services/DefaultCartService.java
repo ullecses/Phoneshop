@@ -12,6 +12,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -115,7 +116,7 @@ public class DefaultCartService implements CartService {
         Product product = productDao.getProduct(productId);
         Optional<CartItem> cartItemOptional = cart.getItems().stream()
                 .filter(c -> c.getProduct().getId().equals(product.getId()))
-                .findAny();
+                .findFirst();
 
         int productsAmount = cartItemOptional.map(CartItem::getQuantity).orElse(0);
 
@@ -134,10 +135,10 @@ public class DefaultCartService implements CartService {
     }
 
     private void recalculateTotalCost(Cart cart) {
-        double totalCost = 0;
+        BigDecimal totalCost = BigDecimal.ZERO;
         for (CartItem item : cart.getItems()) {
-            totalCost += item.getProduct().getPrice().doubleValue() * item.getQuantity();
+            totalCost = totalCost.add(item.getProduct().getPrice().multiply(BigDecimal.valueOf(item.getQuantity())));
         }
-        cart.setTotalCost(BigDecimal.valueOf(totalCost));
+        cart.setTotalCost(totalCost.setScale(2, RoundingMode.HALF_UP));
     }
 }

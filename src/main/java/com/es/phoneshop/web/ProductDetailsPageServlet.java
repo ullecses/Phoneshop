@@ -3,11 +3,11 @@ package com.es.phoneshop.web;
 import com.es.phoneshop.exception.OutOfStockException;
 import com.es.phoneshop.exception.ProductNotFoundException;
 import com.es.phoneshop.model.cart.Cart;
-import com.es.phoneshop.services.CartService;
-import com.es.phoneshop.services.DefaultCartService;
 import com.es.phoneshop.model.product.ArrayListProductDao;
 import com.es.phoneshop.model.product.Product;
 import com.es.phoneshop.model.product.ProductDao;
+import com.es.phoneshop.services.CartService;
+import com.es.phoneshop.services.DefaultCartService;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -16,33 +16,30 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
-import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static com.es.phoneshop.utils.Constants.CART;
+import static com.es.phoneshop.utils.Constants.ERROR;
+import static com.es.phoneshop.utils.Constants.ERROR_MESSAGE;
+import static com.es.phoneshop.utils.Constants.INVALID_PRODUCT_ID;
+import static com.es.phoneshop.utils.Constants.MESSAGE;
+import static com.es.phoneshop.utils.Constants.PRODUCT;
+import static com.es.phoneshop.utils.Constants.PRODUCT_ADDED_TO_CART;
+import static com.es.phoneshop.utils.Constants.PRODUCT_ID;
+import static com.es.phoneshop.utils.Constants.QUANTITY;
+import static com.es.phoneshop.utils.Constants.RECENT_PRODUCTS;
+import static com.es.phoneshop.utils.Constants.WEB_INF_PAGES_ERROR_JSP;
+import static com.es.phoneshop.utils.Constants.WEB_INF_PAGES_PRODUCT_JSP;
+import static com.es.phoneshop.utils.Constants.WEB_INF_PAGES_PRODUCT_NOT_FOUND_JSP;
+import static com.es.phoneshop.utils.ValidationUtils.parseQuantity;
+
 public class ProductDetailsPageServlet extends HttpServlet {
-    public static final String WEB_INF_PAGES_PRODUCT_JSP = "/WEB-INF/pages/product.jsp";
-    public static final String WEB_INF_PAGES_PRODUCT_NOT_FOUND_JSP = "/WEB-INF/pages/product-not-found.jsp";
-    public static final String WEB_INF_PAGES_ERROR_JSP = "/WEB-INF/pages/error.jsp";
-
-    public static final String PRODUCT = "product";
-    public static final String CART = "cart";
-    public static final String PRODUCT_ID = "productId";
-    public static final String RECENT_PRODUCTS = "recentProducts";
-    public static final String QUANTITY = "quantity";
-    public static final String MESSAGE = "message";
-    public static final String PRODUCT_ADDED_TO_CART = "Product added to cart";
-
-    public static final String ERROR = "error";
-    public static final String ERROR_MESSAGE = "errorMessage";
-    public static final String INVALID_QUANTITY_FORMAT = "Invalid quantity format";
-    public static final String NOT_ENOUGH_STOCK_AVAILABLE = "Not enough stock available";
-    public static final String INVALID_PRODUCT_ID = "Invalid product ID";
-    public static final String QUANTITY_MUST_BE_GREATER_THAN_ZERO = "Quantity must be greater than zero.";
 
     private ProductDao productDAO;
     private CartService cartService;
@@ -118,16 +115,11 @@ public class ProductDetailsPageServlet extends HttpServlet {
         String quantityStr = request.getParameter(QUANTITY);
 
         int quantity;
-        request.getLocale();
-        NumberFormat format = NumberFormat.getInstance(request.getLocale());
+        Locale locale = request.getLocale();
         try {
-            Number parsedNumber = format.parse(quantityStr);
-            quantity = parsedNumber.intValue();
-            if (quantity <= 0) {
-                throw new NumberFormatException(QUANTITY_MUST_BE_GREATER_THAN_ZERO);
-            }
+            quantity = parseQuantity(quantityStr, locale);
         } catch (ParseException | NumberFormatException e) {
-            request.setAttribute(ERROR, INVALID_QUANTITY_FORMAT);
+            request.setAttribute(ERROR, e.getMessage());
             request.setAttribute(QUANTITY, quantityStr);
             doGet(request, response);
             return;
@@ -138,7 +130,7 @@ public class ProductDetailsPageServlet extends HttpServlet {
             cartService.add(cart, productId, quantity);
             request.setAttribute(MESSAGE, PRODUCT_ADDED_TO_CART);
         } catch (OutOfStockException e) {
-            request.setAttribute(ERROR, NOT_ENOUGH_STOCK_AVAILABLE);
+            request.setAttribute(ERROR, e.getMessage());
             request.setAttribute(QUANTITY, quantity);
         }
         doGet(request, response);

@@ -4,6 +4,7 @@ import com.es.phoneshop.exception.NonPositiveQuantityException;
 import com.es.phoneshop.exception.OutOfStockException;
 import com.es.phoneshop.model.cart.Cart;
 import com.es.phoneshop.services.DefaultCartService;
+import com.es.phoneshop.utils.ValidationUtils;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -11,11 +12,18 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
-import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
+
+import static com.es.phoneshop.utils.Constants.CART;
+import static com.es.phoneshop.utils.Constants.CART_MESSAGE_CART_UPDATED_SUCCESSFULLY;
+import static com.es.phoneshop.utils.Constants.ERRORS;
+import static com.es.phoneshop.utils.Constants.INVALID_FORM_SUBMISSION;
+import static com.es.phoneshop.utils.Constants.INVALID_PRODUCT_ID;
+import static com.es.phoneshop.utils.Constants.INVALID_QUANTITY_FORMAT;
+import static com.es.phoneshop.utils.Constants.PRODUCT_ID;
+import static com.es.phoneshop.utils.Constants.QUANTITY;
 
 public class CartPageServlet extends HttpServlet {
     public static final String WEB_INF_PAGES_CART_JSP = "/WEB-INF/pages/cart.jsp";
@@ -33,51 +41,42 @@ public class CartPageServlet extends HttpServlet {
             throws ServletException, IOException {
         Cart cart = cartService.getCart(request);
         cartService.recalculateCart(cart);
-        request.setAttribute("cart", cart);
+        request.setAttribute(CART, cart);
         request.getRequestDispatcher(WEB_INF_PAGES_CART_JSP).forward(request, response);
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String[] productIds = request.getParameterValues("productId");
-        String[] quantities = request.getParameterValues("quantity");
+        String[] productIds = request.getParameterValues(PRODUCT_ID);
+        String[] quantities = request.getParameterValues(QUANTITY);
 
         Map<Long, String> errors = new HashMap<>();
 
         if (productIds == null || quantities == null || productIds.length != quantities.length) {
-            request.setAttribute("errors", Map.of(-1L, "Invalid form submission"));
+            request.setAttribute(ERRORS, Map.of(-1L, INVALID_FORM_SUBMISSION));
             doGet(request, response);
             return;
         }
 
         for (int i = 0; i < productIds.length; i++) {
             try {
-                long productId = Long.parseLong(productIds[i]);
-                int quantity = getQuantity(quantities[i], request);
+                long productId = ValidationUtils.validateProductId(productIds[i]);
+                int quantity = ValidationUtils.validateAndParseQuantity(quantities[i], request.getLocale());
                 cartService.update(cartService.getCart(request), productId, quantity);
             } catch (NumberFormatException e) {
-                errors.put(-1L, "Invalid product ID format");
+                errors.put(-1L, INVALID_PRODUCT_ID);
             } catch (ParseException e) {
-                errors.put(Long.parseLong(productIds[i]), "Invalid quantity format");
+                errors.put(Long.parseLong(productIds[i]), INVALID_QUANTITY_FORMAT);
             } catch (OutOfStockException | NonPositiveQuantityException e) {
                 errors.put(Long.parseLong(productIds[i]), e.getMessage());
             }
         }
 
         if (errors.isEmpty()) {
-            response.sendRedirect(request.getContextPath() + "/cart?message=Cart updated successfully");
+            response.sendRedirect(request.getContextPath() + CART_MESSAGE_CART_UPDATED_SUCCESSFULLY);
         } else {
-            request.setAttribute("errors", errors);
+            request.setAttribute(ERRORS, errors);
             doGet(request, response);
         }
-    }
-
-    public static int getQuantity(String quantityString, HttpServletRequest request) throws ParseException {
-        NumberFormat numberFormat = getNumberFormat(request.getLocale());
-        return numberFormat.parse(quantityString).intValue();
-    }
-
-    protected static NumberFormat getNumberFormat(Locale locale) {
-        return NumberFormat.getInstance(locale);
     }
 }

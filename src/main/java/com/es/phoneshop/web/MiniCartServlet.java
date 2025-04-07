@@ -10,6 +10,8 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 
+import static com.es.phoneshop.utils.Constants.CART;
+
 public class MiniCartServlet extends HttpServlet {
     public static final String WEB_INF_PAGES_MINICART_JSP = "/WEB-INF/pages/minicart.jsp";
 
@@ -24,7 +26,7 @@ public class MiniCartServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        request.setAttribute("cart", cartService.getCart(request));
+        request.setAttribute(CART, cartService.getCart(request));
         request.getRequestDispatcher(WEB_INF_PAGES_MINICART_JSP).include(request, response);
     }
 }
