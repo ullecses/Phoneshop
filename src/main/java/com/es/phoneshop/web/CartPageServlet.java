@@ -16,17 +16,17 @@ import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.es.phoneshop.utils.Constants.CART;
-import static com.es.phoneshop.utils.Constants.CART_MESSAGE_CART_UPDATED_SUCCESSFULLY;
-import static com.es.phoneshop.utils.Constants.ERRORS;
-import static com.es.phoneshop.utils.Constants.INVALID_FORM_SUBMISSION;
-import static com.es.phoneshop.utils.Constants.INVALID_PRODUCT_ID;
-import static com.es.phoneshop.utils.Constants.INVALID_QUANTITY_FORMAT;
-import static com.es.phoneshop.utils.Constants.PRODUCT_ID;
-import static com.es.phoneshop.utils.Constants.QUANTITY;
-
 public class CartPageServlet extends HttpServlet {
     public static final String WEB_INF_PAGES_CART_JSP = "/WEB-INF/pages/cart.jsp";
+    public static final String QUANTITY = "quantity";
+    public static final String PRODUCT_ID = "productId";
+    public static final String CART = "cart";
+    public static final String ERRORS = "errors";;
+    public static final String CART_MESSAGE_CART_UPDATED_SUCCESSFULLY = "/cart?message=Cart updated successfully";
+
+    public static final String INVALID_QUANTITY_FORMAT = "Invalid quantity format";
+    public static final String INVALID_PRODUCT_ID = "Invalid product ID";
+    public static final String INVALID_FORM_SUBMISSION = "Invalid form submission";
 
     private DefaultCartService cartService;
 

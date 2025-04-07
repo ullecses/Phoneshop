@@ -24,23 +24,26 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static com.es.phoneshop.utils.Constants.CART;
-import static com.es.phoneshop.utils.Constants.ERROR;
-import static com.es.phoneshop.utils.Constants.ERROR_MESSAGE;
-import static com.es.phoneshop.utils.Constants.INVALID_PRODUCT_ID;
-import static com.es.phoneshop.utils.Constants.MESSAGE;
-import static com.es.phoneshop.utils.Constants.PRODUCT;
-import static com.es.phoneshop.utils.Constants.PRODUCT_ADDED_TO_CART;
-import static com.es.phoneshop.utils.Constants.PRODUCT_ID;
-import static com.es.phoneshop.utils.Constants.QUANTITY;
-import static com.es.phoneshop.utils.Constants.RECENT_PRODUCTS;
-import static com.es.phoneshop.utils.Constants.WEB_INF_PAGES_ERROR_JSP;
-import static com.es.phoneshop.utils.Constants.WEB_INF_PAGES_PRODUCT_JSP;
-import static com.es.phoneshop.utils.Constants.WEB_INF_PAGES_PRODUCT_NOT_FOUND_JSP;
 import static com.es.phoneshop.utils.ValidationUtils.parseQuantity;
 
 public class ProductDetailsPageServlet extends HttpServlet {
 
+    public static final String QUANTITY = "quantity";
+    public static final String PRODUCT_ID = "productId";
+    public static final String CART = "cart";
+    public static final String ERROR = "error";
+    public static final String PRODUCT = "product";
+    public static final String MESSAGE = "message";
+    public static final String ERROR_MESSAGE = "errorMessage";
+
+    public static final String WEB_INF_PAGES_PRODUCT_JSP = "/WEB-INF/pages/product.jsp";
+    public static final String WEB_INF_PAGES_PRODUCT_NOT_FOUND_JSP = "/WEB-INF/pages/product-not-found.jsp";
+    public static final String WEB_INF_PAGES_ERROR_JSP = "/WEB-INF/pages/error.jsp";
+
+    public static final String RECENT_PRODUCTS = "recentProducts";
+    public static final String PRODUCT_ADDED_TO_CART = "Product added to cart";
+
+    public static final String INVALID_PRODUCT_ID = "Invalid product ID";
     private ProductDao productDAO;
     private CartService cartService;
 

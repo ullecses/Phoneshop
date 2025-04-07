@@ -26,15 +26,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
-import static com.es.phoneshop.utils.Constants.CART_MESSAGE_CART_UPDATED_SUCCESSFULLY;
-import static com.es.phoneshop.utils.Constants.ERRORS;
-import static com.es.phoneshop.utils.Constants.INVALID_FORM_SUBMISSION;
-import static com.es.phoneshop.utils.Constants.INVALID_PRODUCT_ID;
-import static com.es.phoneshop.utils.Constants.INVALID_QUANTITY_FORMAT;
-import static com.es.phoneshop.utils.Constants.PRODUCTS;
-import static com.es.phoneshop.utils.Constants.PRODUCT_ID;
-import static com.es.phoneshop.utils.Constants.QUANTITY;
-import static com.es.phoneshop.utils.Constants.WEB_INF_PAGES_PRODUCT_LIST_JSP;
 import static com.es.phoneshop.utils.ValidationUtils.parseQuantity;
 
 public class ProductListPageServlet extends HttpServlet {
@@ -42,6 +33,18 @@ public class ProductListPageServlet extends HttpServlet {
     public static final String SORT = "sort";
     public static final String ORDER = "order";
     public static final String PRICE_HISTORY_MAP = "priceHistoryMap";
+    public static final String QUANTITY = "quantity";
+    public static final String PRODUCT_ID = "productId";
+    public static final String ERRORS = "errors";
+    public static final String PRODUCTS = "products";
+
+    public static final String WEB_INF_PAGES_PRODUCT_LIST_JSP = "/WEB-INF/pages/productList.jsp";
+
+    public static final String CART_MESSAGE_CART_UPDATED_SUCCESSFULLY = "/cart?message=Cart updated successfully";
+
+    public static final String INVALID_QUANTITY_FORMAT = "Invalid quantity format";
+    public static final String INVALID_PRODUCT_ID = "Invalid product ID";
+    public static final String INVALID_FORM_SUBMISSION = "Invalid form submission";
 
     private ProductDao productDAO;
     private CartService cartService;

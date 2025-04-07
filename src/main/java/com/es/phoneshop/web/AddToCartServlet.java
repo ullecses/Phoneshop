@@ -14,14 +14,14 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.text.ParseException;
 
-import static com.es.phoneshop.utils.Constants.ERROR;
-import static com.es.phoneshop.utils.Constants.INVALID_QUANTITY_FORMAT;
-import static com.es.phoneshop.utils.Constants.PRODUCT_ID;
-import static com.es.phoneshop.utils.Constants.QUANTITY;
-import static com.es.phoneshop.utils.Constants.WEB_INF_PAGES_PRODUCT_JSP;
-
 public class AddToCartServlet extends HttpServlet {
     public static final String CART = "/cart?message=Product added to cart";
+    public static final String QUANTITY = "quantity";
+    public static final String PRODUCT_ID = "productId";
+    public static final String ERROR = "error";
+
+    public static final String WEB_INF_PAGES_PRODUCT_JSP = "/WEB-INF/pages/product.jsp";
+    public static final String INVALID_QUANTITY_FORMAT = "Invalid quantity format";
 
     private CartService cartService;
 
