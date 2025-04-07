@@ -103,7 +103,7 @@ public class ProductDetailsPageServlet extends HttpServlet {
             request.getRequestDispatcher(WEB_INF_PAGES_PRODUCT_JSP).forward(request, response);
 
         } catch (ProductNotFoundException e) {
-            request.setAttribute(PRODUCT_ID, e.getProductId());
+            request.setAttribute(PRODUCT_ID, e.getMessage());
             request.getRequestDispatcher(WEB_INF_PAGES_PRODUCT_NOT_FOUND_JSP).forward(request, response);
         } catch (Exception e) {
             request.setAttribute(ERROR_MESSAGE, INVALID_PRODUCT_ID);

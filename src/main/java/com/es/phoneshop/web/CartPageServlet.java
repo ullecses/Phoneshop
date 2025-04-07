@@ -1,5 +1,6 @@
 package com.es.phoneshop.web;
 
+import com.es.phoneshop.exception.NegativeStockException;
 import com.es.phoneshop.exception.OutOfStockException;
 import com.es.phoneshop.model.cart.Cart;
 import com.es.phoneshop.services.CartService;
@@ -9,6 +10,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.eclipse.tags.shaded.org.apache.bcel.generic.ATHROW;
 
 import java.io.IOException;
 import java.text.NumberFormat;
@@ -43,14 +45,16 @@ public class CartPageServlet extends HttpServlet {
 
         Map<Long, String> errors = new HashMap<>();
         for (int i = 0; i < productIds.length; i++) {
-            Long productId = Long.valueOf(productIds[i]);
+            long productId = Long.parseLong(productIds[i]);
 
             int quantity;
             try {
                 quantity = getQuantity(quantities[i], request);
                 cartService.update(cartService.getCart(request), productId, quantity);
-            } catch (ParseException | OutOfStockException e) {
-                handleError(request, response, e);
+            } catch (ParseException e) {
+                errors.put(productId, "Invalid quantity format");
+            } catch (OutOfStockException | NegativeStockException e) {
+                errors.put(productId, e.getMessage());
             }
         }
 
@@ -61,22 +65,10 @@ public class CartPageServlet extends HttpServlet {
             doGet(request, response);
         }
     }
+
     private int getQuantity(String quantityString, HttpServletRequest request) throws ParseException {
         NumberFormat numberFormat = getNumberFormat(request.getLocale());
         return numberFormat.parse(quantityString).intValue();
-    }
-
-    private void handleError(HttpServletRequest request, HttpServletResponse response, Exception e) throws ServletException, IOException {
-        if (e.getClass().equals(ParseException.class)) {
-            request.setAttribute("error", "Not a number");
-        } else {
-            if (((OutOfStockException) e).getStockRequested() <= 0) {
-                request.setAttribute("error", "Can't be negative or zero");
-            } else {
-                request.setAttribute("error", "Out of stock, max available " + ((OutOfStockException) e).getStockAvailable());
-            }
-        }
-        doGet(request, response);
     }
 
     protected NumberFormat getNumberFormat(Locale locale) {

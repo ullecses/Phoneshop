@@ -1,5 +1,6 @@
 package com.es.phoneshop.services;
 
+import com.es.phoneshop.exception.NegativeStockException;
 import com.es.phoneshop.exception.OutOfStockException;
 import com.es.phoneshop.exception.ProductNotFoundException;
 import com.es.phoneshop.model.cart.Cart;
@@ -16,7 +17,7 @@ import java.util.stream.Collectors;
 public class DefaultCartService implements CartService {
     private static final String CART_SESSION_ATTRIBUTE = DefaultCartService.class.getName() + ".cart";
 
-    private ProductDao productDao;
+    private final ProductDao productDao;
 
     public DefaultCartService() {
         productDao = ArrayListProductDao.getInstance();
@@ -53,14 +54,14 @@ public class DefaultCartService implements CartService {
                 throw new ProductNotFoundException(productId);
             }
             if (product.getStock() < quantity) {
-                throw new OutOfStockException(product, quantity, product.getStock());
+                throw new OutOfStockException(product);
             }
 
             for (CartItem item : cart.getItems()) {
                 if (item.getProduct().getId() == productId) {
                     int newQuantity = item.getQuantity() + quantity;
                     if (newQuantity > product.getStock()) {
-                        throw new OutOfStockException(product, newQuantity, product.getStock());
+                        throw new OutOfStockException(product);
                     }
                     item.setQuantity(newQuantity);
                     return;
@@ -74,11 +75,15 @@ public class DefaultCartService implements CartService {
 
     @Override
     public void update(Cart cart, long productId, int quantity) throws OutOfStockException {
+        if (quantity < 0) {
+            throw new NegativeStockException();
+        }
+
         Product product = productDao.getProduct(productId);
         Optional<CartItem> cartItemOptional = findCartItemForUpdate(cart, productId, quantity);
 
         if (product.getStock() < quantity) {
-            throw new OutOfStockException(product, quantity, product.getStock());
+            throw new OutOfStockException(product);
         }
 
         if (cartItemOptional.isPresent()) {
@@ -98,7 +103,7 @@ public class DefaultCartService implements CartService {
 
     private Optional<CartItem> findCartItemForUpdate(Cart cart, long productId, int quantity) throws OutOfStockException {
         if (quantity <= 0) {
-            throw new OutOfStockException(null, quantity, 0);
+            throw new NegativeStockException();
         }
 
         Product product = productDao.getProduct(productId);
@@ -109,7 +114,7 @@ public class DefaultCartService implements CartService {
         int productsAmount = cartItemOptional.map(CartItem::getQuantity).orElse(0);
 
         if (product.getStock() < productsAmount + quantity) {
-            throw new OutOfStockException(product, productsAmount + quantity, product.getStock());
+            throw new OutOfStockException(product);
         }
 
         return cartItemOptional;

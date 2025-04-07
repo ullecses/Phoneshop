@@ -1,5 +1,6 @@
 package com.es.phoneshop.model.cart;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -11,6 +12,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Cart implements Serializable {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private List<CartItem> items;
@@ -24,6 +26,6 @@ public class Cart implements Serializable {
 
     @Override
     public String toString() {
-        return "Cart[" + items + "]";
+        return String.format("Cart[%s]", items);
     }
 }

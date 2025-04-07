@@ -4,11 +4,13 @@ import com.es.phoneshop.model.product.Product;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 @Getter
 @Setter
 public class CartItem implements Serializable {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private Product product;
