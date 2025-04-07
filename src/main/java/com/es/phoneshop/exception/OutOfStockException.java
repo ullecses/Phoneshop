@@ -7,4 +7,8 @@ public class OutOfStockException extends RuntimeException {
     public OutOfStockException(Product product) {
         super("There are not so products with id " + product.getId());
     }
+
+    public OutOfStockException() {
+        super("There are not so products");
+    }
 }

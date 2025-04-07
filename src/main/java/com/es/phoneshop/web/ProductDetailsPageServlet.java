@@ -138,4 +138,12 @@ public class ProductDetailsPageServlet extends HttpServlet {
         }
         doGet(request, response);
     }
+
+    protected Product getProduct(long productId) {
+        return productDAO.getProduct(productId);
+    }
+
+    protected Cart getCart(HttpServletRequest request) {
+        return cartService.getCart(request);
+    }
 }
