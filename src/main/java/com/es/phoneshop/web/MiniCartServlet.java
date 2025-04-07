@@ -25,7 +25,6 @@ public class MiniCartServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         request.setAttribute("cart", cartService.getCart(request));
-
         request.getRequestDispatcher(WEB_INF_PAGES_MINICART_JSP).include(request, response);
     }
 }

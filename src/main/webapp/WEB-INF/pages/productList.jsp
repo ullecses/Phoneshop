@@ -7,9 +7,16 @@
 <jsp:useBean id="priceHistoryMap" type="java.util.Map" scope="request"/>
 
 <tags:master pageTitle="Product List">
-  <p>
-    Welcome to Expert-Soft training!
-  </p>
+  <c:if test="${not empty message}">
+    <div class="param.success">
+      ${message}
+    </div>
+  </c:if>
+  <c:if test="${not empty error}">
+    <div class="error">
+      ${error}
+    </div>
+  </c:if>
   <form>
    <input name="query" value="${param.query}">
    <button>Search</button>
@@ -29,6 +36,8 @@
           <tags:sortLink sort="price" order="desc"/>
         </td>
         <td>History</td>
+        <td>Quantity</td>
+        <td>Add to Cart</td>
       </tr>
     </thead>
     <c:forEach var="product" items="${products}">
@@ -67,6 +76,13 @@
                 </c:otherwise>
               </c:choose>
             </div>
+          </td>
+          <td colspan="2">
+            <form action="${pageContext.servletContext.contextPath}/addToCart" method="post">
+              <input type="hidden" name="productId" value="${product.id}" />
+              <input type="number" name="quantity" value="1" min="1" />
+              <button type="submit">Add to Cart</button>
+            </form>
           </td>
         </tr>
       </c:forEach>

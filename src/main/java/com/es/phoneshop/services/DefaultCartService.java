@@ -1,6 +1,6 @@
 package com.es.phoneshop.services;
 
-import com.es.phoneshop.exception.NegativeStockException;
+import com.es.phoneshop.exception.NonPositiveQuantityException;
 import com.es.phoneshop.exception.OutOfStockException;
 import com.es.phoneshop.exception.ProductNotFoundException;
 import com.es.phoneshop.model.cart.Cart;
@@ -11,6 +11,7 @@ import com.es.phoneshop.model.product.ProductDao;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -18,6 +19,8 @@ public class DefaultCartService implements CartService {
     private static final String CART_SESSION_ATTRIBUTE = DefaultCartService.class.getName() + ".cart";
 
     private final ProductDao productDao;
+
+    private static volatile DefaultCartService instance;
 
     public DefaultCartService() {
         productDao = ArrayListProductDao.getInstance();
@@ -27,12 +30,15 @@ public class DefaultCartService implements CartService {
         this.productDao = productDao;
     }
 
-    private static class SingletonHelper {
-        private static final DefaultCartService INSTANCE = new DefaultCartService();
-    }
-
     public static DefaultCartService getInstance() {
-        return SingletonHelper.INSTANCE;
+        if (instance == null) {
+            synchronized (DefaultCartService.class) {
+                if (instance == null) {
+                    instance = new DefaultCartService();
+                }
+            }
+        }
+        return instance;
     }
 
     @Override
@@ -76,7 +82,7 @@ public class DefaultCartService implements CartService {
     @Override
     public void update(Cart cart, long productId, int quantity) throws OutOfStockException {
         if (quantity < 0) {
-            throw new NegativeStockException();
+            throw new NonPositiveQuantityException();
         }
 
         Product product = productDao.getProduct(productId);
@@ -103,7 +109,7 @@ public class DefaultCartService implements CartService {
 
     private Optional<CartItem> findCartItemForUpdate(Cart cart, long productId, int quantity) throws OutOfStockException {
         if (quantity <= 0) {
-            throw new NegativeStockException();
+            throw new NonPositiveQuantityException();
         }
 
         Product product = productDao.getProduct(productId);
@@ -120,9 +126,18 @@ public class DefaultCartService implements CartService {
         return cartItemOptional;
     }
 
-    private void recalculateCart(Cart cart) {
+    public void recalculateCart(Cart cart) {
         cart.setTotalQuantity(cart.getItems().stream()
                 .map(CartItem::getQuantity)
                 .collect(Collectors.summingInt(q -> q.intValue())));
+        recalculateTotalCost(cart);
+    }
+
+    private void recalculateTotalCost(Cart cart) {
+        double totalCost = 0;
+        for (CartItem item : cart.getItems()) {
+            totalCost += item.getProduct().getPrice().doubleValue() * item.getQuantity();
+        }
+        cart.setTotalCost(BigDecimal.valueOf(totalCost));
     }
 }

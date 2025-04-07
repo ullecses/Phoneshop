@@ -22,7 +22,7 @@ public class CartItem implements Serializable {
     }
 
     @Override
-    public String toString () {
-        return product.getCode() + ", " + quantity;
+    public String toString() {
+        return String.format("%s, %d", product.getCode(), quantity);
     }
 }
