@@ -3,9 +3,6 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="tags" tagdir="/WEB-INF/tags" %>
 
-<jsp:useBean id="products" type="java.util.ArrayList" scope="request"/>
-<jsp:useBean id="priceHistoryMap" type="java.util.Map" scope="request"/>
-
 <tags:master pageTitle="Product List">
   <c:if test="${not empty message}">
     <div class="param.success">
@@ -18,8 +15,8 @@
     </div>
   </c:if>
   <form>
-   <input name="query" value="${param.query}">
-   <button>Search</button>
+    <input name="query" value="${param.query}">
+    <button>Search</button>
   </form>
   <table>
     <thead>
@@ -40,7 +37,8 @@
         <td>Add to Cart</td>
       </tr>
     </thead>
-    <c:forEach var="product" items="${products}">
+    <c:if test="${not empty products}">
+      <c:forEach var="product" items="${products}">
         <tr>
           <td>
             <img class="product-tile" src="${product.imageUrl}" alt="${product.description}">
@@ -67,7 +65,7 @@
                                         type="currency"
                                         currencySymbol="${price.currency.symbol}"
                                         pattern="#,##0.00"/>
-                                        (Updated on <fmt:formatDate value="${price.date}" pattern="dd-MM-yyyy HH:mm"/>)
+                      (Updated on <fmt:formatDate value="${price.date}" pattern="dd-MM-yyyy HH:mm"/>)
                     </div>
                   </c:forEach>
                 </c:when>
@@ -86,6 +84,7 @@
           </td>
         </tr>
       </c:forEach>
+    </c:if>
   </table>
 
   <script>

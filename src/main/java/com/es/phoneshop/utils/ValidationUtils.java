@@ -7,6 +7,9 @@ import java.text.ParseException;
 import java.util.Locale;
 
 public class ValidationUtils {
+
+    public static final String PRODUCT_ID_MUST_BE_POSITIVE = "Product ID must be positive";
+
     public static int validateAndParseQuantity(String quantityStr, Locale locale) throws ParseException, NonPositiveQuantityException, ParseException {
         int quantity = parseQuantity(quantityStr, locale);
         if (quantity <= 0) {
@@ -17,7 +20,7 @@ public class ValidationUtils {
 
     public static long validateProductId(String idStr) throws NumberFormatException {
         long id = Long.parseLong(idStr);
-        if (id < 0) throw new NumberFormatException("Product ID must be positive");
+        if (id < 0) throw new NumberFormatException(PRODUCT_ID_MUST_BE_POSITIVE);
         return id;
     }
 
