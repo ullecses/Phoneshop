@@ -1,5 +1,6 @@
 package com.es.phoneshop.web;
 
+import com.es.phoneshop.exception.NonPositiveQuantityException;
 import com.es.phoneshop.exception.OutOfStockException;
 import com.es.phoneshop.exception.ProductNotFoundException;
 import com.es.phoneshop.model.cart.Cart;
@@ -121,7 +122,7 @@ public class ProductDetailsPageServlet extends HttpServlet {
         Locale locale = request.getLocale();
         try {
             quantity = parseQuantity(quantityStr, locale);
-        } catch (ParseException | NumberFormatException e) {
+        } catch (ParseException | NumberFormatException | NonPositiveQuantityException e) {
             request.setAttribute(ERROR, e.getMessage());
             request.setAttribute(QUANTITY, quantityStr);
             doGet(request, response);
