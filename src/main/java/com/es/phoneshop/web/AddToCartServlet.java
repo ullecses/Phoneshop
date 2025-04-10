@@ -1,6 +1,8 @@
 package com.es.phoneshop.web;
 
 import com.es.phoneshop.exception.NonPositiveQuantityException;
+import com.es.phoneshop.exception.OutOfStockException;
+import com.es.phoneshop.model.cart.Cart;
 import com.es.phoneshop.services.CartService;
 import com.es.phoneshop.services.DefaultCartService;
 import com.es.phoneshop.services.ProductListPageService;
@@ -13,20 +15,16 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.HashMap;
-import java.util.Map;
 
-public class ProductListPageServlet extends HttpServlet {
+public class AddToCartServlet extends HttpServlet {
+    public static final String CART = "/cart?message=Product added to cart";
     public static final String QUANTITY = "quantity";
     public static final String PRODUCT_ID = "productId";
-    public static final String ERRORS = "errors";
+    public static final String ERROR = "error";
 
     public static final String WEB_INF_PAGES_PRODUCT_LIST_JSP = "/WEB-INF/pages/productList.jsp";
-    public static final String CART_MESSAGE_CART_UPDATED_SUCCESSFULLY = "/cart?message=Cart updated successfully";
-
-    public static final String INVALID_QUANTITY_FORMAT = "Invalid quantity format";
-    public static final String INVALID_PRODUCT_ID = "Invalid product ID";
-    public static final String INVALID_FORM_SUBMISSION = "Invalid form submission";
+    public static final String INVALID_PRODUCT_ID_FORMAT = "Invalid product ID format";
+    public static final String PRODUCT_ID_OR_QUANTITY_IS_MISSING = "Product ID or quantity is missing";
 
     private CartService cartService;
 
@@ -37,44 +35,43 @@ public class ProductListPageServlet extends HttpServlet {
     }
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        ProductListPageService.getInstance().fillRequestWithProducts(request);
-        request.getRequestDispatcher(WEB_INF_PAGES_PRODUCT_LIST_JSP).forward(request, response);
-    }
-
-    @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String productIdParam = request.getParameter(PRODUCT_ID);
         String quantityParam = request.getParameter(QUANTITY);
 
-        Map<Long, String> errors = new HashMap<>();
-
         if (productIdParam == null || quantityParam == null) {
-            request.setAttribute(ERRORS, Map.of(-1L, INVALID_FORM_SUBMISSION));
-            doGet(request, response);
+            handleInvalidInput(request, response, PRODUCT_ID_OR_QUANTITY_IS_MISSING);
             return;
         }
 
-        long productId = 0;
+        long productId;
         try {
             productId = ValidationUtils.validateProductId(productIdParam);
         } catch (NumberFormatException e) {
-            errors.put(-1L, INVALID_PRODUCT_ID);
+            handleInvalidInput(request, response, INVALID_PRODUCT_ID_FORMAT);
+            return;
         }
 
-        int quantity = 0;
+        int quantity;
         try {
             quantity = ValidationUtils.validateAndParseQuantity(quantityParam, request.getLocale());
         } catch (ParseException | NonPositiveQuantityException e) {
-            errors.put(productId, INVALID_QUANTITY_FORMAT);
+            handleInvalidInput(request, response, e.getMessage());
+            return;
         }
 
-        if (errors.isEmpty()) {
-            cartService.update(cartService.getCart(request), productId, quantity);
-            response.sendRedirect(request.getContextPath() + CART_MESSAGE_CART_UPDATED_SUCCESSFULLY);
-        } else {
-            request.setAttribute(ERRORS, errors);
-            doGet(request, response);
+        Cart cart = cartService.getCart(request);
+        try {
+            cartService.add(cart, productId, quantity);
+            response.sendRedirect(request.getContextPath() + CART);
+        } catch (OutOfStockException e) {
+            handleInvalidInput(request, response, e.getMessage());
         }
+    }
+
+    private void handleInvalidInput(HttpServletRequest request, HttpServletResponse response, String errorMessage) throws ServletException, IOException {
+        request.setAttribute(ERROR, errorMessage);
+        ProductListPageService.getInstance().fillRequestWithProducts(request);
+        request.getRequestDispatcher(WEB_INF_PAGES_PRODUCT_LIST_JSP).forward(request, response);
     }
 }
