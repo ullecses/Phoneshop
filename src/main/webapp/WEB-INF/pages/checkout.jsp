@@ -3,9 +3,9 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="tags" tagdir="/WEB-INF/tags" %>
 
-<jsp:useBean id="cart" type="com.es.phoneshop.model.cart.Cart" scope="request"/>
+<jsp:useBean id="order" type="com.es.phoneshop.model.order.Order" scope="request"/>
 
-<tags:master pageTitle="Product Cart">
+<tags:master pageTitle="Checkout">
   <p>Cart: ${cart}</p>
 
   <c:if test="${not empty param.message}">
@@ -16,7 +16,7 @@
     <div class="error">${errors[item.product.id]}</div>
   </c:if>
 
-  <form method="post" action="${pageContext.servletContext.contextPath}/cart">
+  <form method="post" action="${pageContext.servletContext.contextPath}/checkout">
     <table>
       <thead>
         <tr>
@@ -28,7 +28,7 @@
         </tr>
       </thead>
       <tbody>
-        <c:forEach var="item" items="${cart.items}" varStatus="status">
+        <c:forEach var="item" items="${order.items}" varStatus="status">
           <tr>
             <td>
               <img class="product-tile" src="${item.product.imageUrl}" alt="Product Image"/>
@@ -41,20 +41,10 @@
             <td class="quantity">
               <c:set var="error" value="${errors[item.product.id]}"/>
               <input name="quantity" value="${not empty error ? paramValues['quantity'][status.index] : item.quantity}" class="quantity"/>
-              <c:if test="${not empty error}">
-                <div class="error">${errors[item.product.id]}</div>
-              </c:if>
-              <input type="hidden" name="productId" value="${item.product.id}"/>
             </td>
             <td>
               <fmt:formatNumber value="${item.product.price}" pattern="#,##0.00"/>
               <c:out value="${item.product.currency.symbol != null ? item.product.currency.symbol : '$'}"/>
-            </td>
-            <td>
-              <button form="deleteCartItem"
-                      formaction="${pageContext.servletContext.contextPath}/cart/deleteCartItem/${item.product.id}">
-                Delete
-              </button>
             </td>
           </tr>
         </c:forEach>
@@ -67,14 +57,41 @@
         </tr>
       </tbody>
     </table>
-
-    <p>
-      <button type="submit">Update</button>
-    </p>
+    <h2>Your details</h2>
+    <table>
+      <tr>
+        <td>First name<span style="color:red">*</span></td>
+        <td>
+          <c:set var="error" value="${errors['firstName']}"/>
+          <input name="firstName" value="$not empty error ? param['firstName'] : order.firstName"/>
+          <c:if test="${not empty error}">
+            <div class="error">${errors}</div>
+          </c:if>
+        </td>
+      </tr>
+      <tr>
+        <td>Last name<span style="color:red">*</span></td>
+        <td><input name="lastName"/></td>
+      </tr>
+      <tr>
+        <td>Phone<span style="color:red">*</span></td>
+        <td><input name="phone"/></td>
+      </tr>
+      <tr>
+        <td>Delivery Date<span style="color:red">*</span></td>
+        <td><input name="deliveryDate"/></td>
+      </tr>
+      <tr>
+        <td>Delivery Address<span style="color:red">*</span></td>
+        <td><input name="deliveryAddress"/></td>
+      </tr>
+      <tr>
+        <td>Payment Method<span style="color:red">*</span></td>
+        <td><input name="paymentMethod"/></td>
+      </tr>
+    </table>
+    <p><button type="submit">Update</button></p>
   </form>
 
-  <form action="${pageContext.servletContext.contextPath}/checkout">
-    <button>Checkout</button>
-  </form>
   <form id="deleteCartItem" method="post"></form>
 </tags:master>

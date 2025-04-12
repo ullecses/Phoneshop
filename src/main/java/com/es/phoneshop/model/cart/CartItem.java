@@ -9,7 +9,7 @@ import java.io.Serializable;
 
 @Getter
 @Setter
-public class CartItem implements Serializable {
+public class CartItem implements Serializable, Cloneable {
     @Serial
     private static final long serialVersionUID = 1L;
 
@@ -24,5 +24,10 @@ public class CartItem implements Serializable {
     @Override
     public String toString() {
         return String.format("%s, %d", product.getCode(), quantity);
+    }
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
     }
 }
