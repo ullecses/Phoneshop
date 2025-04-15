@@ -46,6 +46,7 @@ public class CheckoutPageServlet extends HttpServlet {
         Cart cart = cartService.getCart(request);
         cartService.recalculateCart(cart);
         request.setAttribute(ORDER, orderService.getOrder(cart));
+        request.setAttribute("paymentMethods", orderService.getPaymentMethod());
         request.getRequestDispatcher(WEB_INF_PAGES_CHECKOUT_JSP).forward(request, response);
     }
 
@@ -63,10 +64,13 @@ public class CheckoutPageServlet extends HttpServlet {
         setPaymentMethod(request, errors, order);
 
         if (errors.isEmpty()) {
-            response.sendRedirect(request.getContextPath() + CHECKOUT_MESSAGE);
+            orderService.placeOrder(order);
+            //cartService. почистить карту
+            response.sendRedirect(request.getContextPath() + "/order/overview/" + order.getSecureId());
         } else {
             request.setAttribute(ERRORS, errors);
             request.setAttribute(ORDER, order);
+            request.setAttribute("paymentMethods", orderService.getPaymentMethod());
             request.getRequestDispatcher(WEB_INF_PAGES_CHECKOUT_JSP).forward(request, response);
         }
 

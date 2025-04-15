@@ -10,6 +10,8 @@ import java.time.LocalDate;
 @Getter
 @Setter
 public class Order extends Cart {
+    private long id;
+    private String secureId;
     private BigDecimal subtotal;
     private BigDecimal deliveryCost;
 

@@ -5,17 +5,8 @@
 
 <jsp:useBean id="order" type="com.es.phoneshop.model.order.Order" scope="request"/>
 
-<tags:master pageTitle="Checkout">
-  <p>Cart: ${cart}</p>
-
-  <c:if test="${not empty param.message}">
-    <div class="success">${param.message}</div>
-  </c:if>
-
-  <c:if test="${not empty error}">
-    <div class="error">${errors[item.product.id]}</div>
-  </c:if>
-
+<tags:master pageTitle="Order overview">
+  <h2>Order overview</h2>
   <form method="post" action="${pageContext.servletContext.contextPath}/checkout">
     <table>
       <thead>
@@ -59,21 +50,16 @@
     </table>
     <h2>Your details</h2>
     <table>
-      <tags:orderFormRow name="firstName" label="First Name" order="${order}" errors="${errors}"></tags:orderFormRow>
-      <tags:orderFormRow name="lastName" label="Last Name" order="${order}" errors="${errors}"></tags:orderFormRow>
-      <tags:orderFormRow name="phone" label="Phone" order="${order}" errors="${errors}"></tags:orderFormRow>
-      <tags:orderFormRow name="deliveryDate" label="Delivery Date" order="${order}" errors="${errors}"></tags:orderFormRow>
-      <tags:orderFormRow name="deliveryAddress" label="Delivery Address" order="${order}" errors="${errors}"></tags:orderFormRow>
+      <tags:orderOverviewRow name="firstName" label="First Name" order="${order}"></tags:orderFormRow>
+      <tags:orderOverviewRow name="lastName" label="Last Name" order="${order}"></tags:orderFormRow>
+      <tags:orderFormRow name="phone" label="Phone" order="${order}"></tags:orderFormRow>
+      <tags:orderOverviewRow name="deliveryDate" label="Delivery Date" order="${order}"></tags:orderFormRow>
+      <tags:orderOverviewRow name="deliveryAddress" label="Delivery Address" order="${order}"></tags:orderFormRow>
 
       <tr>
         <td>Payment Method<span style="color:red">*</span></td>
         <td>
-          <select name="paymentMethod"/>
-            <option></option>
-            <c:forEach var="paymentMethod" items="${paymentMethods}">
-            <option>${paymentMethod}</option>
-            </c:forEach>
-          </select>
+          ${order.paymentMethod}
           <c:set var="error" value="${errors['paymentMethod']}"/>
           <c:if test="${not empty error}">
             <div class="error">
@@ -86,5 +72,4 @@
     <p><button type="submit">Update</button></p>
   </form>
 
-  <form id="deleteCartItem" method="post"></form>
 </tags:master>

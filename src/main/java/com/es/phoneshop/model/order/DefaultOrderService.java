@@ -5,11 +5,14 @@ import com.es.phoneshop.model.cart.CartItem;
 import com.es.phoneshop.model.product.ArrayListProductDao;
 
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class DefaultOrderService implements OrderService {
 
     private static volatile DefaultOrderService instance;
+    private OrderDao orderDao = ArrayListOrderDao.getInstance();
 
     public DefaultOrderService() {
         instance = new DefaultOrderService();
@@ -40,6 +43,17 @@ public class DefaultOrderService implements OrderService {
         order.setDeliveryCost(calculateDeliveryCost());
         order.setTotalCost(order.getSubtotal().add(order.getDeliveryCost()));
         return order;
+    }
+
+    @Override
+    public List<PaymentMethod> getPaymentMethod() {
+        return List.of(PaymentMethod.values());
+    }
+
+    @Override
+    public void placeOrder(Order order) {
+        order.setSecureId(UUID.randomUUID().toString());
+        orderDao.save(order);
     }
 
     private BigDecimal calculateDeliveryCost() {
