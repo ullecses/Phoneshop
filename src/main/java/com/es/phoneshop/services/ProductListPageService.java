@@ -17,11 +17,11 @@ import java.util.Objects;
 public class ProductListPageService {
     @Getter
     private static final ProductListPageService instance = new ProductListPageService();
-    public static final String QUERY = "query";
-    public static final String SORT = "sort";
-    public static final String ORDER = "order";
-    public static final String PRODUCTS = "products";
-    public static final String PRICE_HISTORY_MAP = "priceHistoryMap";
+    private static final String QUERY = "query";
+    private static final String SORT = "sort";
+    private static final String ORDER = "order";
+    private static final String PRODUCTS = "products";
+    private static final String PRICE_HISTORY_MAP = "priceHistoryMap";
     private final ProductDao productDao;
 
     private ProductListPageService() {

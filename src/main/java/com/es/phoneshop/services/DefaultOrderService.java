@@ -1,8 +1,11 @@
-package com.es.phoneshop.model.order;
+package com.es.phoneshop.services;
 
 import com.es.phoneshop.model.cart.Cart;
 import com.es.phoneshop.model.cart.CartItem;
-import com.es.phoneshop.model.product.ArrayListProductDao;
+import com.es.phoneshop.model.order.ArrayListOrderDao;
+import com.es.phoneshop.model.order.Order;
+import com.es.phoneshop.model.order.OrderDao;
+import com.es.phoneshop.model.order.PaymentMethod;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -11,12 +14,9 @@ import java.util.stream.Collectors;
 
 public class DefaultOrderService implements OrderService {
 
+    private final DefaultCartService cartService = DefaultCartService.getInstance();
     private static volatile DefaultOrderService instance;
-    private OrderDao orderDao = ArrayListOrderDao.getInstance();
-
-    public DefaultOrderService() {
-        instance = new DefaultOrderService();
-    }
+    private final OrderDao orderDao = ArrayListOrderDao.getInstance();
 
     public static DefaultOrderService getInstance() {
         if (instance == null) {
@@ -31,6 +31,7 @@ public class DefaultOrderService implements OrderService {
 
     @Override
     public Order getOrder(Cart cart) {
+        cartService.recalculateCart(cart);
         Order order = new Order();
         order.setItems(cart.getItems().stream().map(item -> {
             try {

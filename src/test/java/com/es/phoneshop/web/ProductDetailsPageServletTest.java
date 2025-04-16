@@ -34,6 +34,10 @@ class ProductDetailsPageServletTest {
     private final long productId = 1L;
     private Product testProduct;
 
+    private static final String WEB_INF_PAGES_PRODUCT_NOT_FOUND_JSP = "/WEB-INF/pages/product-not-found.jsp";
+    private static final String WEB_INF_PAGES_ERROR_JSP = "/WEB-INF/pages/error.jsp";
+
+
     @BeforeEach
     void setup() throws Exception {
         servlet = new ProductDetailsPageServlet();
@@ -57,7 +61,7 @@ class ProductDetailsPageServletTest {
     void testDoGetInvalidProductId() throws Exception {
         // Arrange
         when(request.getPathInfo()).thenReturn("/abc");
-        when(request.getRequestDispatcher(ProductDetailsPageServlet.WEB_INF_PAGES_ERROR_JSP)).thenReturn(requestDispatcher);
+        when(request.getRequestDispatcher(WEB_INF_PAGES_ERROR_JSP)).thenReturn(requestDispatcher);
 
         // Act
         servlet.doGet(request, response);
@@ -71,7 +75,7 @@ class ProductDetailsPageServletTest {
     void testDoGetProductNotFound() throws Exception {
         // Arrange
         when(request.getPathInfo()).thenReturn("/999");
-        when(request.getRequestDispatcher(ProductDetailsPageServlet.WEB_INF_PAGES_PRODUCT_NOT_FOUND_JSP)).thenReturn(requestDispatcher);
+        when(request.getRequestDispatcher(WEB_INF_PAGES_PRODUCT_NOT_FOUND_JSP)).thenReturn(requestDispatcher);
         servlet = spy(servlet);
         doThrow(new ProductNotFoundException(999L)).when(servlet).getProduct(999L);
 

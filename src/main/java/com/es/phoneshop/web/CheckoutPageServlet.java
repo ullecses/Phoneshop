@@ -1,14 +1,11 @@
 package com.es.phoneshop.web;
 
-import com.es.phoneshop.exception.NonPositiveQuantityException;
-import com.es.phoneshop.exception.OutOfStockException;
 import com.es.phoneshop.model.cart.Cart;
-import com.es.phoneshop.model.order.DefaultOrderService;
+import com.es.phoneshop.services.DefaultOrderService;
 import com.es.phoneshop.model.order.Order;
-import com.es.phoneshop.model.order.OrderService;
+import com.es.phoneshop.services.OrderService;
 import com.es.phoneshop.model.order.PaymentMethod;
 import com.es.phoneshop.services.DefaultCartService;
-import com.es.phoneshop.utils.ValidationUtils;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -16,19 +13,14 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
-import java.text.ParseException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
 public class CheckoutPageServlet extends HttpServlet {
-    public static final String WEB_INF_PAGES_CHECKOUT_JSP = "/WEB-INF/pages/checkout.jsp";
-    public static final String QUANTITY = "quantity";
-    public static final String PRODUCT_ID = "productId";
-    public static final String ORDER = "order";
-    public static final String ERRORS = "errors";;
-    public static final String CHECKOUT_MESSAGE = "/checkout?message=Cart updated successfully";
+    private static final String WEB_INF_PAGES_CHECKOUT_JSP = "/WEB-INF/pages/checkout.jsp";
+    private static final String ORDER = "order";
+    private static final String ERRORS = "errors";
 
     private DefaultCartService cartService;
     private OrderService orderService;
@@ -65,7 +57,7 @@ public class CheckoutPageServlet extends HttpServlet {
 
         if (errors.isEmpty()) {
             orderService.placeOrder(order);
-            //cartService. почистить карту
+            cartService.clearCart(cart);
             response.sendRedirect(request.getContextPath() + "/order/overview/" + order.getSecureId());
         } else {
             request.setAttribute(ERRORS, errors);

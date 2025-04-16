@@ -15,7 +15,6 @@
           <td>Description</td>
           <td class="quantity">Quantity</td>
           <td class="price">Price</td>
-          <td>Action</td>
         </tr>
       </thead>
       <tbody>
@@ -31,7 +30,8 @@
             </td>
             <td class="quantity">
               <c:set var="error" value="${errors[item.product.id]}"/>
-              <input name="quantity" value="${not empty error ? paramValues['quantity'][status.index] : item.quantity}" class="quantity"/>
+              <!-- Сделать поле для количества только для чтения -->
+              <input type="text" value="${not empty error ? paramValues['quantity'][status.index] : item.quantity}" class="quantity" readonly/>
             </td>
             <td>
               <fmt:formatNumber value="${item.product.price}" pattern="#,##0.00"/>
@@ -40,21 +40,36 @@
           </tr>
         </c:forEach>
         <tr>
+          <td colspan="3">Subtotal</td>
+          <td colspan="2">
+            <fmt:formatNumber value="${order.subtotal}" pattern="#,##0.00"/>
+            <c:out value="${order.items[0].product.currency.symbol != null ? order.items[0].product.currency.symbol : '$'}"/>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3">Delivery cost</td>
+          <td colspan="2">
+            <fmt:formatNumber value="${order.deliveryCost}" pattern="#,##0.00"/>
+            <c:out value="${order.items[0].product.currency.symbol != null ? order.items[0].product.currency.symbol : '$'}"/>
+          </td>
+        </tr>
+        <tr>
           <td colspan="3">Total cost</td>
           <td colspan="2">
-            <fmt:formatNumber value="${cart.totalCost}" pattern="#,##0.00"/>
-            <c:out value="${cart.items[0].product.currency.symbol != null ? cart.items[0].product.currency.symbol : '$'}"/>
+            <fmt:formatNumber value="${order.totalCost}" pattern="#,##0.00"/>
+            <c:out value="${order.items[0].product.currency.symbol != null ? order.items[0].product.currency.symbol : '$'}"/>
           </td>
         </tr>
       </tbody>
     </table>
+
     <h2>Your details</h2>
     <table>
-      <tags:orderOverviewRow name="firstName" label="First Name" order="${order}"></tags:orderFormRow>
-      <tags:orderOverviewRow name="lastName" label="Last Name" order="${order}"></tags:orderFormRow>
-      <tags:orderFormRow name="phone" label="Phone" order="${order}"></tags:orderFormRow>
-      <tags:orderOverviewRow name="deliveryDate" label="Delivery Date" order="${order}"></tags:orderFormRow>
-      <tags:orderOverviewRow name="deliveryAddress" label="Delivery Address" order="${order}"></tags:orderFormRow>
+      <tags:orderOverviewRow name="firstName" label="First Name" order="${order}"></tags:orderOverviewRow>
+      <tags:orderOverviewRow name="lastName" label="Last Name" order="${order}"></tags:orderOverviewRow>
+      <tags:orderOverviewRow name="phone" label="Phone" order="${order}"></tags:orderOverviewRow>
+      <tags:orderOverviewRow name="deliveryDate" label="Delivery Date" order="${order}"></tags:orderOverviewRow>
+      <tags:orderOverviewRow name="deliveryAddress" label="Delivery Address" order="${order}"></tags:orderOverviewRow>
 
       <tr>
         <td>Payment Method<span style="color:red">*</span></td>
@@ -69,7 +84,6 @@
         </td>
       </tr>
     </table>
-    <p><button type="submit">Update</button></p>
   </form>
 
 </tags:master>

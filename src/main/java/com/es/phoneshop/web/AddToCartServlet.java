@@ -17,7 +17,7 @@ import java.io.IOException;
 import java.text.ParseException;
 
 public class AddToCartServlet extends HttpServlet {
-    public static final String CART = "/cart?message=Product added to cart";
+    public static final String CART = "/cart";
     public static final String QUANTITY = "quantity";
     public static final String PRODUCT_ID = "productId";
     public static final String ERROR = "error";
@@ -25,6 +25,8 @@ public class AddToCartServlet extends HttpServlet {
     public static final String WEB_INF_PAGES_PRODUCT_LIST_JSP = "/WEB-INF/pages/productList.jsp";
     public static final String INVALID_PRODUCT_ID_FORMAT = "Invalid product ID format";
     public static final String PRODUCT_ID_OR_QUANTITY_IS_MISSING = "Product ID or quantity is missing";
+    public static final String MESSAGE = "message";
+    public static final String PRODUCT_ADDED_TO_CART = "Product added to cart";
 
     private CartService cartService;
 
@@ -36,35 +38,26 @@ public class AddToCartServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String productIdParam = request.getParameter(PRODUCT_ID);
-        String quantityParam = request.getParameter(QUANTITY);
-
-        if (productIdParam == null || quantityParam == null) {
-            handleInvalidInput(request, response, PRODUCT_ID_OR_QUANTITY_IS_MISSING);
-            return;
-        }
-
-        long productId;
         try {
-            productId = ValidationUtils.validateProductId(productIdParam);
+            String productIdParam = request.getParameter(PRODUCT_ID);
+            String quantityParam = request.getParameter(QUANTITY);
+
+            if (productIdParam == null || quantityParam == null) {
+                throw new IllegalArgumentException(PRODUCT_ID_OR_QUANTITY_IS_MISSING);
+            }
+
+            long productId = ValidationUtils.validateProductId(productIdParam);
+            int quantity = ValidationUtils.validateAndParseQuantity(quantityParam, request.getLocale());
+
+            Cart cart = cartService.getCart(request);
+            cartService.add(cart, productId, quantity);
+
+            request.setAttribute(MESSAGE, PRODUCT_ADDED_TO_CART);
+            request.getRequestDispatcher(CART).forward(request, response);
+
         } catch (NumberFormatException e) {
             handleInvalidInput(request, response, INVALID_PRODUCT_ID_FORMAT);
-            return;
-        }
-
-        int quantity;
-        try {
-            quantity = ValidationUtils.validateAndParseQuantity(quantityParam, request.getLocale());
-        } catch (ParseException | NonPositiveQuantityException e) {
-            handleInvalidInput(request, response, e.getMessage());
-            return;
-        }
-
-        Cart cart = cartService.getCart(request);
-        try {
-            cartService.add(cart, productId, quantity);
-            response.sendRedirect(request.getContextPath() + CART);
-        } catch (OutOfStockException e) {
+        } catch (ParseException | NonPositiveQuantityException | OutOfStockException | IllegalArgumentException e) {
             handleInvalidInput(request, response, e.getMessage());
         }
     }

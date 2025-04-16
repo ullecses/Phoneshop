@@ -1,14 +1,12 @@
 package com.es.phoneshop.model.cart;
 
 import com.es.phoneshop.model.product.Product;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
 import java.io.Serial;
 import java.io.Serializable;
 
-@Getter
-@Setter
+@Data
 public class CartItem implements Serializable, Cloneable {
     @Serial
     private static final long serialVersionUID = 1L;

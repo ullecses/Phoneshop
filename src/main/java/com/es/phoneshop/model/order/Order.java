@@ -1,16 +1,16 @@
 package com.es.phoneshop.model.order;
 
 import com.es.phoneshop.model.cart.Cart;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-@Getter
-@Setter
+@EqualsAndHashCode(callSuper = true)
+@Data
 public class Order extends Cart {
-    private long id;
+    private Long id;
     private String secureId;
     private BigDecimal subtotal;
     private BigDecimal deliveryCost;

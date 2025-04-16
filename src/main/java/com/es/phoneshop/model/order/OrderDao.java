@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 
 public interface OrderDao {
-    Order getOrder(Long id) throws OrderNotFoundException;
-    Order getOrderBySecureId(String secureId) throws OrderNotFoundException;
-    void save(Order order) throws OrderNotFoundException;
+    Order getOrderBySecureId(String secureId);
+    void save(Order order);
 }

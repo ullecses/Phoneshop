@@ -1,4 +1,4 @@
-package com.es.phoneshop.web;
+package com.es.phoneshop.web.init;
 
 import com.es.phoneshop.exception.ProductNotFoundException;
 import com.es.phoneshop.model.product.ArrayListProductDao;
@@ -12,10 +12,10 @@ import java.util.ArrayList;
 import java.util.Currency;
 
 public class DemoDataServletContextListener implements ServletContextListener {
-    public static final String INSERT_DEMO_DATA = "insertDemoData";
-    public static final String FAILED_TO_INSERT_DEMO_DATA = "Failed to insert demo data";
-    public static final String USD = "USD";
-    private ProductDao productDao;
+    private static final String INSERT_DEMO_DATA = "insertDemoData";
+    private static final String FAILED_TO_INSERT_DEMO_DATA = "Failed to insert demo data";
+    private static final String USD = "USD";
+    private final ProductDao productDao;
 
     public DemoDataServletContextListener() {
         this.productDao = ArrayListProductDao.getInstance();

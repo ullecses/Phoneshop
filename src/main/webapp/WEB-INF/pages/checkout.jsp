@@ -24,7 +24,6 @@
           <td>Description</td>
           <td class="quantity">Quantity</td>
           <td class="price">Price</td>
-          <td>Action</td>
         </tr>
       </thead>
       <tbody>
@@ -49,14 +48,29 @@
           </tr>
         </c:forEach>
         <tr>
+          <td colspan="3">Subtotal</td>
+          <td colspan="2">
+            <fmt:formatNumber value="${order.subtotal}" pattern="#,##0.00"/>
+            <c:out value="${order.items[0].product.currency.symbol != null ? order.items[0].product.currency.symbol : '$'}"/>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3">Delivery cost</td>
+          <td colspan="2">
+            <fmt:formatNumber value="${order.deliveryCost}" pattern="#,##0.00"/>
+            <c:out value="${order.items[0].product.currency.symbol != null ? order.items[0].product.currency.symbol : '$'}"/>
+          </td>
+        </tr>
+        <tr>
           <td colspan="3">Total cost</td>
           <td colspan="2">
-            <fmt:formatNumber value="${cart.totalCost}" pattern="#,##0.00"/>
-            <c:out value="${cart.items[0].product.currency.symbol != null ? cart.items[0].product.currency.symbol : '$'}"/>
+            <fmt:formatNumber value="${order.totalCost}" pattern="#,##0.00"/>
+            <c:out value="${order.items[0].product.currency.symbol != null ? order.items[0].product.currency.symbol : '$'}"/>
           </td>
         </tr>
       </tbody>
     </table>
+
     <h2>Your details</h2>
     <table>
       <tags:orderFormRow name="firstName" label="First Name" order="${order}" errors="${errors}"></tags:orderFormRow>
@@ -83,7 +97,7 @@
         </td>
       </tr>
     </table>
-    <p><button type="submit">Update</button></p>
+    <p><button type="submit">Place order</button></p>
   </form>
 
   <form id="deleteCartItem" method="post"></form>

@@ -9,7 +9,7 @@
     <param-value>true</param-value>
   </context-param>
   <listener>
-    <listener-class>com.es.phoneshop.web.DemoDataServletContextListener</listener-class>
+    <listener-class>com.es.phoneshop.web.init.DemoDataServletContextListener</listener-class>
   </listener>
 
   <servlet>
@@ -94,7 +94,7 @@
 
   <filter>
     <filter-name>dosFilter</filter-name>
-    <filter-class>com.es.phoneshop.web.DosFilter</filter-class>
+    <filter-class>com.es.phoneshop.security.DosFilter</filter-class>
   </filter>
 
   <filter-mapping>

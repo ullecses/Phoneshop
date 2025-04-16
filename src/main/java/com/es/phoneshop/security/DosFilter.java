@@ -1,13 +1,11 @@
-package com.es.phoneshop.web;
+package com.es.phoneshop.security;
 
-import com.es.phoneshop.security.DosProtectionService;
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.FilterConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
@@ -17,7 +15,7 @@ public class DosFilter implements Filter {
 
     @Override
     public void init(FilterConfig filterConfig) {
-        dosProtectionService = DosProtectionService.getInstanse();
+        dosProtectionService = DefaultDosProtectionService.getInstance();
     }
 
     @Override
@@ -25,7 +23,7 @@ public class DosFilter implements Filter {
         if (dosProtectionService.isAllowed(servletRequest.getRemoteAddr())) {
             filterChain.doFilter(servletRequest, servletResponse);
         } else {
-            (HttpServletResponse)servletResponse.setStatus(429);
+            ((HttpServletResponse) servletResponse).setStatus(429);
         }
     }
 }

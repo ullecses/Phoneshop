@@ -14,6 +14,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -42,20 +43,6 @@ public class ArrayListOrderDao implements OrderDao {
     }
 
     @Override
-    public Order getOrder(Long id) throws OrderNotFoundException {
-        Lock readLock = rwLock.readLock();
-        readLock.lock();
-        try {
-            return  orderList.stream()
-                    .filter((product -> id.equals(product.getId())))
-                    .findAny()
-                    .orElseThrow();
-        } finally {
-            readLock.unlock();
-        }
-    }
-
-    @Override
     public Order getOrderBySecureId(String secureId) throws OrderNotFoundException {
         Lock readLock = rwLock.readLock();
         readLock.lock();
@@ -70,22 +57,23 @@ public class ArrayListOrderDao implements OrderDao {
     }
 
     @Override
-    public void save(Order order) throws OrderNotFoundException {
+    public void save(Order order) {
         Lock readLock = rwLock.readLock();
         readLock.lock();
         try {
             Long id = order.getId();
             if (id != null) {
-                orderList.remove(getOrder(id));
-                orderList.add(order);
-            }
-            else {
+                Optional<Order> existingOrder = orderList.stream()
+                        .filter(o -> o.getId().equals(id))
+                        .findFirst();
+
+                existingOrder.ifPresent(orderList::remove);
+            } else {
                 order.setId(++orderId);
-                orderList.add(order);
             }
+            orderList.add(order);
         } finally {
             readLock.unlock();
         }
-
     }
 }

@@ -17,16 +17,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ProductListPageServlet extends HttpServlet {
-    public static final String QUANTITY = "quantity";
-    public static final String PRODUCT_ID = "productId";
-    public static final String ERRORS = "errors";
+    private static final String QUANTITY = "quantity";
+    private static final String PRODUCT_ID = "productId";
+    private static final String ERRORS = "errors";
 
-    public static final String WEB_INF_PAGES_PRODUCT_LIST_JSP = "/WEB-INF/pages/productList.jsp";
-    public static final String CART_MESSAGE_CART_UPDATED_SUCCESSFULLY = "/cart?message=Cart updated successfully";
+    private static final String WEB_INF_PAGES_PRODUCT_LIST_JSP = "/WEB-INF/pages/productList.jsp";
+    private static final String CART_MESSAGE_CART_UPDATED_SUCCESSFULLY = "/cart?message=Cart updated successfully";
 
-    public static final String INVALID_QUANTITY_FORMAT = "Invalid quantity format";
-    public static final String INVALID_PRODUCT_ID = "Invalid product ID";
-    public static final String INVALID_FORM_SUBMISSION = "Invalid form submission";
+    private static final String INVALID_QUANTITY_FORMAT = "Invalid quantity format";
+    private static final String INVALID_PRODUCT_ID = "Invalid product ID";
+    private static final String INVALID_FORM_SUBMISSION = "Invalid form submission";
 
     private CartService cartService;
 

@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 public interface ProductDao {
-    Product getProduct(Long id) throws ProductNotFoundException;
+    Product getProduct(Long id);
     ArrayList<Product> findProducts(String query, SortField sortField, SortOrder sortOrder);
     void save(Product product);
     void delete(Long id);

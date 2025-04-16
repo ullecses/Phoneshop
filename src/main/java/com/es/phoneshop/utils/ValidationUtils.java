@@ -20,7 +20,9 @@ public class ValidationUtils {
 
     public static long validateProductId(String idStr) throws NumberFormatException {
         long id = Long.parseLong(idStr);
-        if (id < 0) throw new NumberFormatException(PRODUCT_ID_MUST_BE_POSITIVE);
+        if (id < 0) {
+            throw new NumberFormatException(PRODUCT_ID_MUST_BE_POSITIVE);
+        }
         return id;
     }
 
