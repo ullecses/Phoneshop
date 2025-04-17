@@ -47,10 +47,10 @@ public class ArrayListOrderDao implements OrderDao {
         Lock readLock = rwLock.readLock();
         readLock.lock();
         try {
-            return  orderList.stream()
-                    .filter((product -> secureId.equals(product.getSecureId())))
+            return orderList.stream()
+                    .filter(order -> secureId.equals(order.getSecureId()))
                     .findAny()
-                    .orElseThrow();
+                    .orElseThrow(() -> new OrderNotFoundException(secureId));
         } finally {
             readLock.unlock();
         }

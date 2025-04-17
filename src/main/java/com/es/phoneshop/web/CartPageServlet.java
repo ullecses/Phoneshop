@@ -60,7 +60,8 @@ public class CartPageServlet extends HttpServlet {
 
         for (int i = 0; i < productIds.length; i++) {
             try {
-                long productId = ValidationUtils.validateProductId(productIds[i]);
+                String extractedId = ValidationUtils.extractIdFromPath(productIds[i]);
+                long productId = ValidationUtils.validateProductId(extractedId);
                 int quantity = ValidationUtils.validateAndParseQuantity(quantities[i], request.getLocale());
                 cartService.update(cartService.getCart(request), productId, quantity);
             } catch (NumberFormatException e) {

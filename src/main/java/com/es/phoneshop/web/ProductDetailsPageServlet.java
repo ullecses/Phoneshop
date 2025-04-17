@@ -9,6 +9,7 @@ import com.es.phoneshop.model.product.Product;
 import com.es.phoneshop.model.product.ProductDao;
 import com.es.phoneshop.services.CartService;
 import com.es.phoneshop.services.DefaultCartService;
+import com.es.phoneshop.utils.ValidationUtils;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -23,8 +24,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static com.es.phoneshop.utils.ValidationUtils.parseQuantity;
@@ -63,12 +62,9 @@ public class ProductDetailsPageServlet extends HttpServlet {
         try {
             String pathInfo = request.getPathInfo();
 
-            Matcher matcher = Pattern.compile("\\d+").matcher(pathInfo);
-            if (!matcher.find()) {
-                throw new IllegalArgumentException(INVALID_PRODUCT_ID);
-            }
+            String extractedId = ValidationUtils.extractIdFromPath(pathInfo);
+            long productId = ValidationUtils.validateProductId(extractedId);
 
-            long productId = Long.parseLong(matcher.group());
             Product product = productDAO.getProduct(productId);
 
             if (product == null) {
@@ -113,15 +109,19 @@ public class ProductDetailsPageServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String productInfo = request.getPathInfo().substring(1);
-        long productId = Long.valueOf(productInfo);
+        String pathInfo = request.getPathInfo();
         String quantityStr = request.getParameter(QUANTITY);
-
-        int quantity;
         Locale locale = request.getLocale();
+
+        long productId;
+        int quantity;
+
         try {
-            quantity = parseQuantity(quantityStr, locale);
-        } catch (ParseException | NumberFormatException | NonPositiveQuantityException e) {
+            String idStr = ValidationUtils.extractIdFromPath(pathInfo);
+            productId = ValidationUtils.validateProductId(idStr);
+
+            quantity = ValidationUtils.validateAndParseQuantity(quantityStr, locale);
+        } catch (IllegalArgumentException | ParseException | NonPositiveQuantityException e) {
             request.setAttribute(ERROR, e.getMessage());
             request.setAttribute(QUANTITY, quantityStr);
             doGet(request, response);
@@ -129,13 +129,15 @@ public class ProductDetailsPageServlet extends HttpServlet {
         }
 
         Cart cart = cartService.getCart(request);
+
         try {
             cartService.add(cart, productId, quantity);
             request.setAttribute(MESSAGE, PRODUCT_ADDED_TO_CART);
         } catch (OutOfStockException e) {
             request.setAttribute(ERROR, e.getMessage());
-            request.setAttribute(QUANTITY, quantity);
+            request.setAttribute(QUANTITY, quantityStr);
         }
+
         doGet(request, response);
     }
 
