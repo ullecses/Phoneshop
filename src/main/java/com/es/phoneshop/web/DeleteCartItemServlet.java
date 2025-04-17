@@ -13,7 +13,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 public class DeleteCartItemServlet extends HttpServlet {
-    private static final String PRODUCT_ID_IS_MISSING = "Product ID is missing";
     private static final String CART_MESSAGE_CART_ITEM_REMOVED_SUCCESSFULLY = "/cart?message=Cart item removed successfully";
     private CartService cartService;
 

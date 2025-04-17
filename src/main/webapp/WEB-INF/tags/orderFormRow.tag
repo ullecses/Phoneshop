@@ -10,9 +10,14 @@
   <td>${label}<span style="color:red">*</span></td>
   <td>
     <c:set var="error" value="${errors[name]}"/>
-    <input name="${name}" value="${not empty error ? param[name] : order[name]}"/>
+    <input
+      name="${name}"
+      value="${not empty param[name] ? param[name] : order[name]}"
+      class="${not empty error ? 'error-field' : ''}"
+      placeholder="${name == 'deliveryDate' ? 'DD.MM.YYYY' : ''}"
+    />
     <c:if test="${not empty error}">
-      <div class="error">${errors}</div>
+      <div class="error">${error}</div>
     </c:if>
   </td>
 </tr>

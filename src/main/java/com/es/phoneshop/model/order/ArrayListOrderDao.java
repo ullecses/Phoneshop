@@ -1,25 +1,10 @@
 package com.es.phoneshop.model.order;
 
 import com.es.phoneshop.exception.OrderNotFoundException;
-import com.es.phoneshop.exception.ProductNotFoundException;
-import com.es.phoneshop.model.product.PriceHistory;
-import com.es.phoneshop.model.product.Product;
-import com.es.phoneshop.model.product.ProductDao;
-import com.es.phoneshop.model.product.SortField;
-import com.es.phoneshop.model.product.SortOrder;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class ArrayListOrderDao implements OrderDao {
     private static volatile OrderDao instance;
@@ -49,7 +34,7 @@ public class ArrayListOrderDao implements OrderDao {
         try {
             return orderList.stream()
                     .filter(order -> secureId.equals(order.getSecureId()))
-                    .findAny()
+                    .findFirst()
                     .orElseThrow(() -> new OrderNotFoundException(secureId));
         } finally {
             readLock.unlock();
@@ -58,22 +43,18 @@ public class ArrayListOrderDao implements OrderDao {
 
     @Override
     public void save(Order order) {
-        Lock readLock = rwLock.readLock();
-        readLock.lock();
+        Lock writeLock = rwLock.writeLock();
+        writeLock.lock();
         try {
             Long id = order.getId();
             if (id != null) {
-                Optional<Order> existingOrder = orderList.stream()
-                        .filter(o -> o.getId().equals(id))
-                        .findFirst();
-
-                existingOrder.ifPresent(orderList::remove);
+                orderList.removeIf(o -> o.getId().equals(id));
             } else {
                 order.setId(++orderId);
             }
             orderList.add(order);
         } finally {
-            readLock.unlock();
+            writeLock.unlock();
         }
     }
 }

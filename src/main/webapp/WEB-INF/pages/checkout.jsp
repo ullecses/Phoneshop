@@ -7,15 +7,19 @@
 <jsp:useBean id="order" type="com.es.phoneshop.model.order.Order" scope="request"/>
 
 <tags:master pageTitle="Checkout">
-  <p>Cart: ${cart}</p>
-
-  <c:if test="${not empty param.message}">
-    <div class="success">${param.message}</div>
-  </c:if>
-
-  <c:if test="${not empty error}">
-    <div class="error">${errors[item.product.id]}</div>
-  </c:if>
+  <style>
+    .error-field {
+      border: 2px solid red;
+    }
+    input::placeholder {
+      color: rgba(128, 128, 128, 0.5);
+    }
+    .error {
+      color: red;
+      font-size: 0.9em;
+      margin-top: 5px;
+    }
+  </style>
 
   <form method="post" action="${pageContext.servletContext.contextPath}/checkout">
     <table>
@@ -40,7 +44,11 @@
             </td>
             <td class="quantity">
               <c:set var="error" value="${errors[item.product.id]}"/>
-              <input name="quantity" value="${not empty error ? paramValues['quantity'][status.index] : item.quantity}" class="quantity"/>
+              <input
+                name="quantity"
+                value="${not empty error ? paramValues['quantity'][status.index] : item.quantity}"
+                class="${not empty error ? 'error-field' : ''}"
+              />
             </td>
             <td>
               <fmt:formatNumber value="${item.product.price}" pattern="#,##0.00"/>
@@ -74,31 +82,30 @@
 
     <h2>Your details</h2>
     <table>
-      <tags:orderFormRow name="firstName" label="First Name" order="${order}" errors="${errors}"></tags:orderFormRow>
-      <tags:orderFormRow name="lastName" label="Last Name" order="${order}" errors="${errors}"></tags:orderFormRow>
-      <tags:orderFormRow name="phone" label="Phone" order="${order}" errors="${errors}"></tags:orderFormRow>
-      <tags:orderFormRow name="deliveryDate" label="Delivery Date" order="${order}" errors="${errors}"></tags:orderFormRow>
-      <tags:orderFormRow name="deliveryAddress" label="Delivery Address" order="${order}" errors="${errors}"></tags:orderFormRow>
+      <tags:orderFormRow name="firstName" label="First Name" order="${order}" errors="${errors}"/>
+      <tags:orderFormRow name="lastName" label="Last Name" order="${order}" errors="${errors}"/>
+      <tags:orderFormRow name="phone" label="Phone" order="${order}" errors="${errors}"/>
+      <tags:orderFormRow name="deliveryDate" label="Delivery Date" order="${order}" errors="${errors}"/>
+      <tags:orderFormRow name="deliveryAddress" label="Delivery Address" order="${order}" errors="${errors}"/>
 
       <tr>
         <td>Payment Method<span style="color:red">*</span></td>
         <td>
-          <select name="paymentMethod">
+          <select name="paymentMethod" class="${not empty errors['paymentMethod'] ? 'error-field' : ''}">
             <c:forEach var="paymentMethod" items="${paymentMethods}">
-              <option value="${paymentMethod}" <c:if test="${order.paymentMethod == paymentMethod || (empty order.paymentMethod && paymentMethod == 'CACHE')}">selected</c:if>>
-                <c:out value="${fn:toLowerCase(paymentMethod)}" />
+              <option value="${paymentMethod}"
+                <c:if test="${order.paymentMethod == paymentMethod || (empty order.paymentMethod && paymentMethod == 'CACHE')}">selected</c:if>>
+                <c:out value="${fn:toLowerCase(paymentMethod)}"/>
               </option>
             </c:forEach>
           </select>
-          <c:set var="error" value="${errors['paymentMethod']}"/>
-          <c:if test="${not empty error}">
-            <div class="error">
-              ${error}
-            </div>
+          <c:if test="${not empty errors['paymentMethod']}">
+            <div class="error">${errors['paymentMethod']}</div>
           </c:if>
         </td>
       </tr>
     </table>
+
     <p><button type="submit">Place order</button></p>
   </form>
 

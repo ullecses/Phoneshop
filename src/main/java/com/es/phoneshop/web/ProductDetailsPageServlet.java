@@ -26,26 +26,23 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static com.es.phoneshop.utils.ValidationUtils.parseQuantity;
-
 public class ProductDetailsPageServlet extends HttpServlet {
 
-    private static final String QUANTITY = "quantity";
-    private static final String PRODUCT_ID = "productId";
-    private static final String CART = "cart";
-    private static final String ERROR = "error";
-    private static final String PRODUCT = "product";
-    private static final String MESSAGE = "message";
-    private static final String ERROR_MESSAGE = "errorMessage";
+    private static final String CART                     = "cart";
+    private static final String ERROR                    = "error";
+    private static final String ERROR_MESSAGE            = "errorMessage";
+    private static final String INVALID_PRODUCT_ID       = "Invalid product ID";
+    private static final String MESSAGE                  = "message";
+    private static final String PRODUCT                  = "product";
+    private static final String PRODUCT_ADDED_TO_CART    = "Product added to cart";
+    private static final String PRODUCT_ID               = "productId";
+    private static final String QUANTITY                 = "quantity";
+    private static final String RECENT_PRODUCTS          = "recentProducts";
 
-    private static final String WEB_INF_PAGES_PRODUCT_JSP = "/WEB-INF/pages/product.jsp";
+    private static final String WEB_INF_PAGES_ERROR_JSP           = "/WEB-INF/pages/error.jsp";
+    private static final String WEB_INF_PAGES_PRODUCT_JSP         = "/WEB-INF/pages/product.jsp";
     private static final String WEB_INF_PAGES_PRODUCT_NOT_FOUND_JSP = "/WEB-INF/pages/product-not-found.jsp";
-    private static final String WEB_INF_PAGES_ERROR_JSP = "/WEB-INF/pages/error.jsp";
 
-    private static final String RECENT_PRODUCTS = "recentProducts";
-    private static final String PRODUCT_ADDED_TO_CART = "Product added to cart";
-
-    private static final String INVALID_PRODUCT_ID = "Invalid product ID";
     private ProductDao productDAO;
     private CartService cartService;
 
@@ -90,8 +87,7 @@ public class ProductDetailsPageServlet extends HttpServlet {
             session.setAttribute(RECENT_PRODUCTS, recentProducts);
 
             List<Product> displayRecentProducts = recentProducts.stream()
-                    .filter(p -> p.getId() != productId)
-                    .limit(3)
+                    .skip(1)
                     .collect(Collectors.toList());
 
             request.setAttribute(RECENT_PRODUCTS, displayRecentProducts);

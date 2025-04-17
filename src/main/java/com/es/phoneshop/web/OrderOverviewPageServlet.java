@@ -13,11 +13,12 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 public class OrderOverviewPageServlet extends HttpServlet {
-    private static final String WEB_INF_PAGES_OVERVIEW_JSP = "/WEB-INF/pages/orderOverview.jsp";
-    public static final String ORDER = "order";
-    public static final String SECURE_ID_IS_MISSING = "Secure ID is missing";
-    private static final String WEB_INF_PAGES_ERROR_JSP = "/WEB-INF/pages/error.jsp";
-    public static final String ERROR_MESSAGE = "errorMessage";
+    private static final String ERROR_MESSAGE               = "errorMessage";
+    private static final String ORDER                       = "order";
+    private static final String SECURE_ID_IS_MISSING        = "Secure ID is missing";
+
+    private static final String WEB_INF_PAGES_ERROR_JSP      = "/WEB-INF/pages/error.jsp";
+    private static final String WEB_INF_PAGES_OVERVIEW_JSP   = "/WEB-INF/pages/orderOverview.jsp";
 
     private OrderDao orderDao;
 
@@ -45,6 +46,7 @@ public class OrderOverviewPageServlet extends HttpServlet {
             request.setAttribute(ERROR_MESSAGE, e.getMessage());
             request.getRequestDispatcher(WEB_INF_PAGES_ERROR_JSP).forward(request, response);
         } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 }
