@@ -3,16 +3,20 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="tags" tagdir="/WEB-INF/tags" %>
 
-<jsp:useBean id="products" type="java.util.ArrayList" scope="request"/>
-<jsp:useBean id="priceHistoryMap" type="java.util.Map" scope="request"/>
-
 <tags:master pageTitle="Product List">
-  <p>
-    Welcome to Expert-Soft training!
-  </p>
+  <c:if test="${not empty message}">
+    <div class="param.success">
+      ${message}
+    </div>
+  </c:if>
+  <c:if test="${not empty error}">
+    <div class="error">
+      ${error}
+    </div>
+  </c:if>
   <form>
-   <input name="query" value="${param.query}">
-   <button>Search</button>
+    <input name="query" value="${param.query}">
+    <button>Search</button>
   </form>
   <table>
     <thead>
@@ -29,9 +33,12 @@
           <tags:sortLink sort="price" order="desc"/>
         </td>
         <td>History</td>
+        <td>Quantity</td>
+        <td>Add to Cart</td>
       </tr>
     </thead>
-    <c:forEach var="product" items="${products}">
+    <c:if test="${not empty products}">
+      <c:forEach var="product" items="${products}">
         <tr>
           <td>
             <img class="product-tile" src="${product.imageUrl}" alt="${product.description}">
@@ -58,7 +65,7 @@
                                         type="currency"
                                         currencySymbol="${price.currency.symbol}"
                                         pattern="#,##0.00"/>
-                                        (Updated on <fmt:formatDate value="${price.date}" pattern="dd-MM-yyyy HH:mm"/>)
+                      (Updated on <fmt:formatDate value="${price.date}" pattern="dd-MM-yyyy HH:mm"/>)
                     </div>
                   </c:forEach>
                 </c:when>
@@ -68,8 +75,16 @@
               </c:choose>
             </div>
           </td>
+          <td colspan="2">
+            <form action="${pageContext.servletContext.contextPath}/addToCart" method="post">
+              <input type="hidden" name="productId" value="${product.id}" />
+              <input type="number" name="quantity" value="1" min="1" />
+              <button type="submit">Add to Cart</button>
+            </form>
+          </td>
         </tr>
       </c:forEach>
+    </c:if>
   </table>
 
   <script>
