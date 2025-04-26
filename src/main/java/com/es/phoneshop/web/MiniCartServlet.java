@@ -11,8 +11,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 public class MiniCartServlet extends HttpServlet {
-    public static final String WEB_INF_PAGES_MINICART_JSP = "/WEB-INF/pages/minicart.jsp";
-    public static final String CART = "cart";
+    private static final String WEB_INF_PAGES_MINICART_JSP = "/WEB-INF/pages/minicart.jsp";
+    private static final String CART = "cart";
 
     private CartService cartService;
 

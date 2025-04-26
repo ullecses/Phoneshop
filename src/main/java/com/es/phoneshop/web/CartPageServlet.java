@@ -17,16 +17,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class CartPageServlet extends HttpServlet {
-    public static final String WEB_INF_PAGES_CART_JSP = "/WEB-INF/pages/cart.jsp";
-    public static final String QUANTITY = "quantity";
-    public static final String PRODUCT_ID = "productId";
-    public static final String CART = "cart";
-    public static final String ERRORS = "errors";;
-    public static final String CART_MESSAGE_CART_UPDATED_SUCCESSFULLY = "/cart?message=Cart updated successfully";
+    private static final String WEB_INF_PAGES_CART_JSP = "/WEB-INF/pages/cart.jsp";
+    private static final String QUANTITY = "quantity";
+    private static final String PRODUCT_ID = "productId";
+    private static final String CART = "cart";
+    private static final String ERRORS = "errors";;
+    private static final String CART_MESSAGE_CART_UPDATED_SUCCESSFULLY = "/cart?message=Cart updated successfully";
 
-    public static final String INVALID_QUANTITY_FORMAT = "Invalid quantity format";
-    public static final String INVALID_PRODUCT_ID = "Invalid product ID";
-    public static final String INVALID_FORM_SUBMISSION = "Invalid form submission";
+    private static final String INVALID_QUANTITY_FORMAT = "Invalid quantity format";
+    private static final String INVALID_PRODUCT_ID = "Invalid product ID";
+    private static final String INVALID_FORM_SUBMISSION = "Invalid form submission";
 
     private DefaultCartService cartService;
 
@@ -60,7 +60,8 @@ public class CartPageServlet extends HttpServlet {
 
         for (int i = 0; i < productIds.length; i++) {
             try {
-                long productId = ValidationUtils.validateProductId(productIds[i]);
+                String extractedId = ValidationUtils.extractIdFromPath(productIds[i]);
+                long productId = ValidationUtils.validateProductId(extractedId);
                 int quantity = ValidationUtils.validateAndParseQuantity(quantities[i], request.getLocale());
                 cartService.update(cartService.getCart(request), productId, quantity);
             } catch (NumberFormatException e) {

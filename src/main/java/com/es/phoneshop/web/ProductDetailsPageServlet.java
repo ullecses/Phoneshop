@@ -9,6 +9,7 @@ import com.es.phoneshop.model.product.Product;
 import com.es.phoneshop.model.product.ProductDao;
 import com.es.phoneshop.services.CartService;
 import com.es.phoneshop.services.DefaultCartService;
+import com.es.phoneshop.utils.ValidationUtils;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -19,32 +20,29 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Optional;
 import java.util.stream.Collectors;
-
-import static com.es.phoneshop.utils.ValidationUtils.parseQuantity;
 
 public class ProductDetailsPageServlet extends HttpServlet {
 
-    public static final String QUANTITY = "quantity";
-    public static final String PRODUCT_ID = "productId";
-    public static final String CART = "cart";
-    public static final String ERROR = "error";
-    public static final String PRODUCT = "product";
-    public static final String MESSAGE = "message";
-    public static final String ERROR_MESSAGE = "errorMessage";
+    private static final String CART                     = "cart";
+    private static final String ERROR                    = "error";
+    private static final String ERROR_MESSAGE            = "errorMessage";
+    private static final String INVALID_PRODUCT_ID       = "Invalid product ID";
+    private static final String MESSAGE                  = "message";
+    private static final String PRODUCT                  = "product";
+    private static final String PRODUCT_ADDED_TO_CART    = "Product added to cart";
+    private static final String PRODUCT_ID               = "productId";
+    private static final String QUANTITY                 = "quantity";
+    private static final String RECENT_PRODUCTS          = "recentProducts";
 
-    public static final String WEB_INF_PAGES_PRODUCT_JSP = "/WEB-INF/pages/product.jsp";
-    public static final String WEB_INF_PAGES_PRODUCT_NOT_FOUND_JSP = "/WEB-INF/pages/product-not-found.jsp";
-    public static final String WEB_INF_PAGES_ERROR_JSP = "/WEB-INF/pages/error.jsp";
+    private static final String WEB_INF_PAGES_ERROR_JSP           = "/WEB-INF/pages/error.jsp";
+    private static final String WEB_INF_PAGES_PRODUCT_JSP         = "/WEB-INF/pages/product.jsp";
+    private static final String WEB_INF_PAGES_PRODUCT_NOT_FOUND_JSP = "/WEB-INF/pages/product-not-found.jsp";
 
-    public static final String RECENT_PRODUCTS = "recentProducts";
-    public static final String PRODUCT_ADDED_TO_CART = "Product added to cart";
-
-    public static final String INVALID_PRODUCT_ID = "Invalid product ID";
     private ProductDao productDAO;
     private CartService cartService;
 
@@ -61,12 +59,9 @@ public class ProductDetailsPageServlet extends HttpServlet {
         try {
             String pathInfo = request.getPathInfo();
 
-            Matcher matcher = Pattern.compile("\\d+").matcher(pathInfo);
-            if (!matcher.find()) {
-                throw new IllegalArgumentException(INVALID_PRODUCT_ID);
-            }
+            String extractedId = ValidationUtils.extractIdFromPath(pathInfo);
+            long productId = ValidationUtils.validateProductId(extractedId);
 
-            long productId = Long.parseLong(matcher.group());
             Product product = productDAO.getProduct(productId);
 
             if (product == null) {
@@ -76,13 +71,10 @@ public class ProductDetailsPageServlet extends HttpServlet {
             request.setAttribute(PRODUCT, product);
 
             HttpSession session = request.getSession();
-            List<Product> recentProducts = (List<Product>) session.getAttribute(RECENT_PRODUCTS);
-
-            if (recentProducts == null) {
-                recentProducts = new ArrayList<>();
-            } else {
-                recentProducts = new ArrayList<>(recentProducts);
-            }
+            List<Product> recentProducts = new ArrayList<>(
+                    Optional.ofNullable((List<Product>) session.getAttribute(RECENT_PRODUCTS))
+                            .orElse(Collections.emptyList())
+            );
 
             recentProducts.removeIf(p -> p.getId() == productId);
 
@@ -95,8 +87,7 @@ public class ProductDetailsPageServlet extends HttpServlet {
             session.setAttribute(RECENT_PRODUCTS, recentProducts);
 
             List<Product> displayRecentProducts = recentProducts.stream()
-                    .filter(p -> p.getId() != productId)
-                    .limit(3)
+                    .skip(1)
                     .collect(Collectors.toList());
 
             request.setAttribute(RECENT_PRODUCTS, displayRecentProducts);
@@ -114,15 +105,19 @@ public class ProductDetailsPageServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String productInfo = request.getPathInfo().substring(1);
-        long productId = Long.valueOf(productInfo);
+        String pathInfo = request.getPathInfo();
         String quantityStr = request.getParameter(QUANTITY);
-
-        int quantity;
         Locale locale = request.getLocale();
+
+        long productId;
+        int quantity;
+
         try {
-            quantity = parseQuantity(quantityStr, locale);
-        } catch (ParseException | NumberFormatException | NonPositiveQuantityException e) {
+            String idStr = ValidationUtils.extractIdFromPath(pathInfo);
+            productId = ValidationUtils.validateProductId(idStr);
+
+            quantity = ValidationUtils.validateAndParseQuantity(quantityStr, locale);
+        } catch (IllegalArgumentException | ParseException | NonPositiveQuantityException e) {
             request.setAttribute(ERROR, e.getMessage());
             request.setAttribute(QUANTITY, quantityStr);
             doGet(request, response);
@@ -130,13 +125,15 @@ public class ProductDetailsPageServlet extends HttpServlet {
         }
 
         Cart cart = cartService.getCart(request);
+
         try {
             cartService.add(cart, productId, quantity);
             request.setAttribute(MESSAGE, PRODUCT_ADDED_TO_CART);
         } catch (OutOfStockException e) {
             request.setAttribute(ERROR, e.getMessage());
-            request.setAttribute(QUANTITY, quantity);
+            request.setAttribute(QUANTITY, quantityStr);
         }
+
         doGet(request, response);
     }
 

@@ -13,9 +13,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 public class DeleteCartItemServlet extends HttpServlet {
-
-    public static final String PRODUCT_ID_IS_MISSING = "Product ID is missing";
-    public static final String CART_MESSAGE_CART_ITEM_REMOVED_SUCCESSFULLY = "/cart?message=Cart item removed successfully";
+    private static final String CART_MESSAGE_CART_ITEM_REMOVED_SUCCESSFULLY = "/cart?message=Cart item removed successfully";
     private CartService cartService;
 
     @Override
@@ -27,18 +25,17 @@ public class DeleteCartItemServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String pathInfo = request.getPathInfo();
-        if (pathInfo == null || pathInfo.length() <= 1) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, PRODUCT_ID_IS_MISSING);
-            return;
-        }
         try {
-            long productId = ValidationUtils.validateProductId(pathInfo.substring(1));
+            String extractedId = ValidationUtils.extractIdFromPath(pathInfo);
+            long productId = ValidationUtils.validateProductId(extractedId);
+
             Cart cart = cartService.getCart(request);
             cartService.delete(cart, productId);
 
             response.sendRedirect(request.getContextPath() + CART_MESSAGE_CART_ITEM_REMOVED_SUCCESSFULLY);
-        } catch (NumberFormatException e) {
+        } catch (IllegalArgumentException e) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
         }
     }
+
 }

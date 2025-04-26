@@ -13,8 +13,8 @@ import jakarta.servlet.http.HttpSession;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class DefaultCartService implements CartService {
     private static final String CART_SESSION_ATTRIBUTE = DefaultCartService.class.getName() + ".cart";
@@ -61,14 +61,14 @@ public class DefaultCartService implements CartService {
                 throw new ProductNotFoundException(productId);
             }
             if (product.getStock() < quantity) {
-                throw new OutOfStockException(product);
+                throw new OutOfStockException(product.getId());
             }
 
             for (CartItem item : cart.getItems()) {
                 if (item.getProduct().getId() == productId) {
                     int newQuantity = item.getQuantity() + quantity;
                     if (newQuantity > product.getStock()) {
-                        throw new OutOfStockException(product);
+                        throw new OutOfStockException(product.getId());
                     }
                     item.setQuantity(newQuantity);
                     return;
@@ -81,23 +81,23 @@ public class DefaultCartService implements CartService {
     }
 
     @Override
-    public void update(Cart cart, long productId, int quantity) throws OutOfStockException {
+    public void update(Cart cart, long productId, int quantity) {
         if (quantity < 0) {
             throw new NonPositiveQuantityException();
         }
 
         Product product = productDao.getProduct(productId);
-        Optional<CartItem> cartItemOptional = findCartItemForUpdate(cart, productId, quantity);
 
         if (product.getStock() < quantity) {
-            throw new OutOfStockException(product);
+            throw new OutOfStockException(product.getId());
         }
 
-        if (cartItemOptional.isPresent()) {
-            cartItemOptional.get().setQuantity(quantity);
-        } else {
-            cart.getItems().add(new CartItem(product, quantity));
-        }
+        findCartItemForUpdate(cart, productId, quantity)
+                .ifPresentOrElse(
+                        item -> item.setQuantity(quantity),
+                        () -> cart.getItems().add(new CartItem(product, quantity))
+                );
+
         recalculateCart(cart);
     }
 
@@ -108,37 +108,46 @@ public class DefaultCartService implements CartService {
         recalculateCart(cart);
     }
 
-    private Optional<CartItem> findCartItemForUpdate(Cart cart, long productId, int quantity) throws OutOfStockException {
+    @Override
+    public void clearCart(Cart cart) {
+        synchronized (cart) {
+            cart.getItems().clear();
+            cart.setTotalQuantity(0);
+            cart.setTotalCost(BigDecimal.ZERO);
+        }
+    }
+
+    private Optional<CartItem> findCartItemForUpdate(Cart cart, long productId, int quantity) {
         if (quantity <= 0) {
             throw new NonPositiveQuantityException();
         }
 
         Product product = productDao.getProduct(productId);
         Optional<CartItem> cartItemOptional = cart.getItems().stream()
-                .filter(c -> c.getProduct().getId().equals(product.getId()))
+                .filter(c -> c.getProduct().getId().equals(productId))
                 .findFirst();
 
         int productsAmount = cartItemOptional.map(CartItem::getQuantity).orElse(0);
 
         if (product.getStock() < productsAmount + quantity) {
-            throw new OutOfStockException(product);
+            throw new OutOfStockException(product.getId());
         }
 
         return cartItemOptional;
     }
 
     public void recalculateCart(Cart cart) {
-        cart.setTotalQuantity(cart.getItems().stream()
-                .map(CartItem::getQuantity)
-                .collect(Collectors.summingInt(q -> q.intValue())));
-        recalculateTotalCost(cart);
-    }
+        List<CartItem> items = cart.getItems();
 
-    private void recalculateTotalCost(Cart cart) {
-        BigDecimal totalCost = BigDecimal.ZERO;
-        for (CartItem item : cart.getItems()) {
-            totalCost = totalCost.add(item.getProduct().getPrice().multiply(BigDecimal.valueOf(item.getQuantity())));
-        }
-        cart.setTotalCost(totalCost.setScale(2, RoundingMode.HALF_UP));
+        int totalQuantity = items.stream()
+                .mapToInt(CartItem::getQuantity)
+                .sum();
+        cart.setTotalQuantity(totalQuantity);
+
+        BigDecimal totalCost = items.stream()
+                .map(item -> item.getProduct().getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                .setScale(2, RoundingMode.HALF_UP);
+        cart.setTotalCost(totalCost);
     }
 }

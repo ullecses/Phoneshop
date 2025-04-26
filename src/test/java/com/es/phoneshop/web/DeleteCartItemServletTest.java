@@ -15,6 +15,9 @@ import static org.mockito.Mockito.when;
 
 class DeleteCartItemServletTest {
 
+    private static final String PRODUCT_ID_IS_MISSING = "Product ID is missing";
+    private static final String CART_MESSAGE_CART_ITEM_REMOVED_SUCCESSFULLY = "/cart?message=Cart item removed successfully";
+
     private DeleteCartItemServlet servlet;
 
     @Mock
@@ -44,7 +47,7 @@ class DeleteCartItemServletTest {
         servlet.doPost(request, response);
 
         // Assert
-        verify(response).sendError(HttpServletResponse.SC_BAD_REQUEST, DeleteCartItemServlet.PRODUCT_ID_IS_MISSING);
+        verify(response).sendError(HttpServletResponse.SC_BAD_REQUEST, PRODUCT_ID_IS_MISSING);
     }
 
     @Test
@@ -71,7 +74,7 @@ class DeleteCartItemServletTest {
 
         // Assert
         verify(cartService).delete(cart, validProductId);
-        verify(response).sendRedirect(request.getContextPath() + DeleteCartItemServlet.CART_MESSAGE_CART_ITEM_REMOVED_SUCCESSFULLY);
+        verify(response).sendRedirect(request.getContextPath() + CART_MESSAGE_CART_ITEM_REMOVED_SUCCESSFULLY);
     }
 
     @Test

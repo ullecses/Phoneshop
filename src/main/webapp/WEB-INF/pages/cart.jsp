@@ -6,7 +6,7 @@
 <jsp:useBean id="cart" type="com.es.phoneshop.model.cart.Cart" scope="request"/>
 
 <tags:master pageTitle="Product Cart">
-  <p>Cart: ${cart}</p>
+  <p>Cart:</p>
 
   <c:if test="${not empty param.message}">
     <div class="success">${param.message}</div>
@@ -68,8 +68,13 @@
       </tbody>
     </table>
 
-    <p><button type="submit">Update</button></p>
+    <p>
+      <button type="submit">Update</button>
+    </p>
   </form>
 
+  <form action="${pageContext.servletContext.contextPath}/checkout">
+    <button>Checkout</button>
+  </form>
   <form id="deleteCartItem" method="post"></form>
 </tags:master>

@@ -7,7 +7,7 @@
   <p>
       Cart:${cart}
   </p>
-        <c:if test= "${not empty param.message}">
+        <c:if test= "${not empty message}">
             <div class = "param.success">
                 ${message}
             </div>
